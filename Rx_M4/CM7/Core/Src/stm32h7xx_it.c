@@ -41,11 +41,18 @@
 
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN PV */
-uint16_t counter[4];
-float conv_enc;
-float kc;
-float ki;
-float kd;
+extern uint8_t dir[4];
+extern uint16_t counter[4];
+extern uint8_t ref[4];
+static float conv_enc;
+static float Kc;
+static float Ki;
+static float Kd;
+volatile float prevspeed[4]={0,0,0,0};
+volatile float prevspeed2[4] = {0,0,0,0};
+volatile float preverror[4]= {0,0,0,0};
+volatile float uM[4] = {0,0,0,0};
+uint8_t cont = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -55,7 +62,51 @@ float kd;
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+uint16_t * Controle(){
+	uint16_t buffer[4];
+	float speed[4];
+	float error[4];
+	float deltaU[4];
 
+	for(uint8_t n=0;n<4;n++){
+		speed[n] = counter[n]*conv_enc;
+		counter[n] = 0;
+		error[n] =ref[n] -  speed[n];
+		deltaU[n] = Kc*(error[n]- preverror[n]) + error[n]*Ki -Kd*(speed[n]-2*prevspeed[n] + prevspeed2[n]);
+		deltaU[n] = floor(deltaU[n]);
+		uM[n] = uM[n] = deltaU[n];
+		//saturador
+		if(uM[n]>1024){
+			uM[n]= 1024;
+		} else if(uM[n]<0){
+			uM[n]=0;
+		}
+		if(dir[n] == 0){
+			uM[n]= uM[n]+1024;
+		}
+		buffer[n] = uM[n];
+	}
+
+	cont = cont +1;
+	if(cont == 1){
+		for(uint8_t n=0;n<4;n++){
+			prevspeed[n] = speed[n];
+			preverror[n] = error[n];
+		}
+	} else if(cont ==2){
+		for(uint8_t n=0;n<4;n++){
+			prevspeed2[n] = prevspeed[n];
+			prevspeed[n] = speed[n];
+			preverror[n] = error[n];
+		}
+		cont = 1;
+	}
+
+
+	return buffer;
+
+
+}
 /* USER CODE END 0 */
 
 /* External variables --------------------------------------------------------*/
