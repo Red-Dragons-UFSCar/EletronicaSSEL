@@ -1284,6 +1284,7 @@ int main(void)
   MX_SPI1_Init();
  8100ece:	f000 fb97 	bl	8101600 <MX_SPI1_Init>
   /* USER CODE BEGIN 2 */
+
   Rx_mode(TxAdress);
  8100ed2:	4832      	ldr	r0, [pc, #200]	@ (8100f9c <main+0x144>)
  8100ed4:	f7ff ff6e 	bl	8100db4 <Rx_mode>

@@ -52,6 +52,9 @@ COM_InitTypeDef BspCOMInit;
 
 /* USER CODE BEGIN PV */
 uint8_t Mensagem[32];
+uint32_t contador =0;
+
+
 // inter-core buffers
 struct shared_data
 {
@@ -93,6 +96,9 @@ uint8_t * get_M4() // get data from M4 to M7 buffer
 		xfr_ptr->sts_4to7 = 0; // M4 to M7 buffer is empty
 	}
 	return buffer; // return the buffer (pointer)
+}
+void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim){
+	contador = __HAL_TIM_GET_COUNTER(&htim4);
 }
 /* USER CODE END 0 */
 
@@ -158,7 +164,10 @@ Error_Handler();
   MX_TIM2_Init();
   MX_TIM5_Init();
   MX_TIM3_Init();
+  MX_TIM4_Init();
   /* USER CODE BEGIN 2 */
+  int count = 0;
+  HAL_TIM_Encoder_Start_IT(&htim4, TIM_CHANNEL_ALL);
 	uint8_t * xfr_data; // pointer to transfer data
 
 
@@ -198,6 +207,8 @@ Error_Handler();
   while (1)
   {
 	  // if  M4 to M7 buffer has data
+
+	  /*
 	  	  if (xfr_ptr->sts_4to7 == 1)
 	  	  {
 	  		  xfr_data = get_M4(); // get data sent from M4 to M7
@@ -209,7 +220,16 @@ Error_Handler();
 	  		  motores[n] = (Mensagem[n]*2048)/255;
 
 	  	  }
+	  	  */
+	  	  contador = __HAL_TIM_GET_COUNTER(&htim4);
+	  	  if(count<2000){
+	  		  motores[0]=0;
+	  	  }  else if(count>=2000){
+	  		motores[0]=1000;
+	  	  }
+	  	  count++;
 	  	  dshot_write(motores);
+
 	  	  HAL_Delay(1);
     /* USER CODE END WHILE */
 
