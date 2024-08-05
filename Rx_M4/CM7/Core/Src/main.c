@@ -25,6 +25,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "dshot.h"
+//oi
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
