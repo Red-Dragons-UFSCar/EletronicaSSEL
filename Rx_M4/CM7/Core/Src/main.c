@@ -20,6 +20,7 @@
 #include "main.h"
 #include "dma.h"
 #include "tim.h"
+#include "usb_device.h"
 #include "gpio.h"
 
 /* Private includes ----------------------------------------------------------*/
@@ -166,6 +167,7 @@ Error_Handler();
   MX_TIM5_Init();
   MX_TIM3_Init();
   MX_TIM4_Init();
+  MX_USB_DEVICE_Init();
   /* USER CODE BEGIN 2 */
   int count = 0;
   HAL_TIM_Encoder_Start_IT(&htim4, TIM_CHANNEL_ALL);
@@ -205,6 +207,7 @@ Error_Handler();
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+  int8_t velocidade=0;
   while (1)
   {
 	  // if  M4 to M7 buffer has data
@@ -230,7 +233,7 @@ Error_Handler();
 	  	  }
 	  	  count++;
 	  	  dshot_write(motores);
-
+	  	  CDC_Transmit_FS(velocidade,sizeof(velocidade));
 	  	  HAL_Delay(1);
     /* USER CODE END WHILE */
 
@@ -261,9 +264,10 @@ void SystemClock_Config(void)
   /** Initializes the RCC Oscillators according to the specified parameters
   * in the RCC_OscInitTypeDef structure.
   */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI48|RCC_OSCILLATORTYPE_HSI;
   RCC_OscInitStruct.HSIState = RCC_HSI_DIV1;
   RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
+  RCC_OscInitStruct.HSI48State = RCC_HSI48_ON;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI;
   RCC_OscInitStruct.PLL.PLLM = 4;
