@@ -9,6 +9,9 @@ RM := rm -rf
 
 # All of the sources participating in the build are defined here
 -include sources.mk
+-include USB_DEVICE/Target/subdir.mk
+-include USB_DEVICE/App/subdir.mk
+-include Middlewares/ST/STM32_USB_Device_Library/subdir.mk
 -include Drivers/STM32H7xx_HAL_Driver/subdir.mk
 -include Drivers/BSP/STM32H7xx_Nucleo/subdir.mk
 -include Core/Startup/subdir.mk
@@ -62,8 +65,8 @@ all: main-build
 main-build: Rx_M4_CM7.elf secondary-outputs
 
 # Tool invocations
-Rx_M4_CM7.elf Rx_M4_CM7.map: $(OBJS) $(USER_OBJS) D:\StWorkspace\Rx_M4\CM7\STM32H755ZITX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "Rx_M4_CM7.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m7 -T"D:\StWorkspace\Rx_M4\CM7\STM32H755ZITX_FLASH.ld" --specs=nosys.specs -Wl,-Map="Rx_M4_CM7.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv5-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+Rx_M4_CM7.elf Rx_M4_CM7.map: $(OBJS) $(USER_OBJS) C:\Users\pedro\git\EletronicaSSEL\Rx_M4\CM7\STM32H755ZITX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "Rx_M4_CM7.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m7 -T"C:\Users\pedro\git\EletronicaSSEL\Rx_M4\CM7\STM32H755ZITX_FLASH.ld" --specs=nosys.specs -Wl,-Map="Rx_M4_CM7.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv5-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 

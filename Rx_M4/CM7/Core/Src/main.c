@@ -207,7 +207,7 @@ Error_Handler();
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  int8_t velocidade=0;
+  uint8_t velocidade=28;
   while (1)
   {
 	  // if  M4 to M7 buffer has data
@@ -234,7 +234,7 @@ Error_Handler();
 	  	  count++;
 	  	  dshot_write(motores);
 	  	  CDC_Transmit_FS(velocidade,sizeof(velocidade));
-	  	  HAL_Delay(1);
+	  	  HAL_Delay(1000);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
