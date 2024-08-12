@@ -332,7 +332,7 @@ void TIM3_IRQHandler(void)
   TIM4->CNT = 0;
   vel_1 = Enc_1;
   if(vel_1>60000){
-		  vel_1 = 65356-vel_1;
+		  vel_1 = vel_1 - 65356;
   }
   velocidade = vel_1/(81.92);
 
