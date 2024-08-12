@@ -26,7 +26,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "dshot.h"
-//oi
+#include "string.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -207,7 +207,8 @@ Error_Handler();
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  uint8_t velocidade=28;
+  char message[40]={'\0'};
+  float velocidade=28.32;
   while (1)
   {
 	  // if  M4 to M7 buffer has data
@@ -233,7 +234,8 @@ Error_Handler();
 	  	  }
 	  	  count++;
 	  	  dshot_write(motores);
-	  	  CDC_Transmit_FS(velocidade,sizeof(velocidade));
+	  	  sprintf(message, "velocidade : %f \n \r",velocidade);
+	  	  CDC_Transmit_FS(message,sizeof(message));
 	  	  HAL_Delay(1000);
     /* USER CODE END WHILE */
 
