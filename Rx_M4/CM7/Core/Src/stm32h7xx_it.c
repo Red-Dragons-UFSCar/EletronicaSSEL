@@ -22,6 +22,7 @@
 #include "stm32h7xx_it.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "stm32h7xx.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -53,6 +54,8 @@ volatile float prevspeed2[4] = {0,0,0,0};
 volatile float preverror[4]= {0,0,0,0};
 volatile float uM[4] = {0,0,0,0};
 uint8_t cont = 0;
+uint32_t Enc_1 = 0;
+int vel_1 = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -117,7 +120,8 @@ extern DMA_HandleTypeDef hdma_tim5_ch2;
 extern DMA_HandleTypeDef hdma_tim5_ch4;
 extern TIM_HandleTypeDef htim3;
 /* USER CODE BEGIN EV */
-
+extern TIM_HandleTypeDef htim4;
+extern float velocidade;
 /* USER CODE END EV */
 
 /******************************************************************************/
@@ -324,6 +328,14 @@ void TIM3_IRQHandler(void)
   /* USER CODE END TIM3_IRQn 0 */
   HAL_TIM_IRQHandler(&htim3);
   /* USER CODE BEGIN TIM3_IRQn 1 */
+  Enc_1 = TIM4->CNT;
+  TIM4->CNT = 0;
+  vel_1 = Enc_1;
+  if(vel_1>60000){
+		  vel_1 = 65356-vel_1;
+  }
+  velocidade = vel_1/(81.92);
+
   HAL_GPIO_TogglePin(GPIOB,GPIO_PIN_14);
   /* USER CODE END TIM3_IRQn 1 */
 }

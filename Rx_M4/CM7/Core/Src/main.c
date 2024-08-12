@@ -55,7 +55,7 @@ COM_InitTypeDef BspCOMInit;
 /* USER CODE BEGIN PV */
 uint8_t Mensagem[32];
 uint32_t contador =0;
-
+float velocidade=28.32;
 
 // inter-core buffers
 struct shared_data
@@ -208,7 +208,6 @@ Error_Handler();
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   char message[40]={'\0'};
-  float velocidade=28.32;
   while (1)
   {
 	  // if  M4 to M7 buffer has data
@@ -226,7 +225,6 @@ Error_Handler();
 
 	  	  }
 	  	  */
-	  	  contador = __HAL_TIM_GET_COUNTER(&htim4);
 	  	  if(count<2000){
 	  		  motores[0]=0;
 	  	  }  else if(count>=2000){
