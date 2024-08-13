@@ -56,6 +56,8 @@ COM_InitTypeDef BspCOMInit;
 uint8_t Mensagem[32];
 uint32_t contador =0;
 float velocidade=0;
+float ref[4] = {9,0,0,0};
+
 
 // inter-core buffers
 struct shared_data
@@ -177,6 +179,7 @@ Error_Handler();
 	//initialize inter-core status pointers
 	xfr_ptr->sts_4to7 = 0;
 	xfr_ptr->sts_7to4 = 0;
+	extern uint16_t uM[4];
 
 	dshot_init(DSHOT150);
 	  if (HAL_TIM_Base_Start_IT(&htim3) != HAL_OK)
@@ -226,11 +229,14 @@ Error_Handler();
 	  	  }
 	  	  */
 	  	  motores[0]=0;
-	  	  if(count>5000){
-	  		  motores[0] = 1000;
+	  	  if(count<5000){
+	  	  dshot_write(motores);
+	  	  }
+	  	  else if(count>=5000){
+	  		dshot_write(uM);
 	  	  }
 	  	  count++;
-	  	  dshot_write(motores);
+
 	  	  sprintf(message, "velocidade : %f \n \r",velocidade);
 	  	  CDC_Transmit_FS(message,sizeof(message));
 	  	  HAL_Delay(1);

@@ -42,20 +42,21 @@
 
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN PV */
-extern uint8_t dir[4];
 extern uint16_t counter[4];
-extern uint8_t ref[4];
-static float conv_enc;
-static float Kc;
-static float Ki;
-static float Kd;
+
+
+extern float ref[4];
+static float Kc = 0 ;
+static float Ki = 0 ;
+static float Kd = 0;
 volatile float prevspeed[4]={0,0,0,0};
 volatile float prevspeed2[4] = {0,0,0,0};
 volatile float preverror[4]= {0,0,0,0};
-volatile float uM[4] = {0,0,0,0};
+volatile uint16_t uM[4] = {0,0,0,0};
 uint8_t cont = 0;
 uint32_t Enc_1 = 0;
 int vel_1 = 0;
+float speed[4];
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -65,15 +66,11 @@ int vel_1 = 0;
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-uint16_t * Controle(){
-	uint16_t buffer[4];
-	float speed[4];
+void Controle(){
 	float error[4];
 	float deltaU[4];
 
 	for(uint8_t n=0;n<4;n++){
-		speed[n] = counter[n]*conv_enc;
-		counter[n] = 0;
 		error[n] =ref[n] -  speed[n];
 		deltaU[n] = Kc*(error[n]- preverror[n]) + error[n]*Ki -Kd*(speed[n]-2*prevspeed[n] + prevspeed2[n]);
 		deltaU[n] = floor(deltaU[n]);
@@ -84,10 +81,10 @@ uint16_t * Controle(){
 		} else if(uM[n]<0){
 			uM[n]=0;
 		}
-		if(dir[n] == 0){
+		if(ref[n] < 0){
 			uM[n]= uM[n]+1024;
 		}
-		buffer[n] = uM[n];
+
 	}
 
 	cont = cont +1;
@@ -104,11 +101,6 @@ uint16_t * Controle(){
 		}
 		cont = 1;
 	}
-
-
-	return buffer;
-
-
 }
 /* USER CODE END 0 */
 
@@ -334,7 +326,9 @@ void TIM3_IRQHandler(void)
   if(vel_1>60000){
 		  vel_1 = vel_1 - 65356;
   }
-  velocidade = vel_1/(81.92);
+  speed[0] = vel_1/(81.92);
+  velocidade = speed[0];
+  Controle();
 
   HAL_GPIO_TogglePin(GPIOB,GPIO_PIN_14);
   /* USER CODE END TIM3_IRQn 1 */
