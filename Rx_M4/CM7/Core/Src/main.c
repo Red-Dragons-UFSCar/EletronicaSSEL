@@ -230,11 +230,15 @@ Error_Handler();
 	  	  */
 	  	  motores[0]=0;
 	  	  if(count<5000){
-	  	  dshot_write(motores);
+	  		  ref[0] = 0;
+
+	  	  } else if(count>=5000){
+	  		  ref[0] = 9;
+
+	  	  } else if(count >= 15000){
+	  		  ref[0] = 6;
 	  	  }
-	  	  else if(count>=5000){
-	  		dshot_write(uM);
-	  	  }
+	  	  dshot_write(uM);
 	  	  count++;
 
 	  	  sprintf(message, "velocidade : %f \n \r",velocidade);

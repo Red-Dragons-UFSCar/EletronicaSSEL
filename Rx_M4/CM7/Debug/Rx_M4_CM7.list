@@ -9,27 +9,27 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, ALLOC, LOAD, READONLY, CODE
   2 .rodata       00000410  08012428  08012428  00013428  2**3
                   CONTENTS, ALLOC, LOAD, READONLY, DATA
-  3 .ARM.extab    00000000  08012838  08012838  000142f8  2**0
+  3 .ARM.extab    00000000  08012838  08012838  000142fc  2**0
                   CONTENTS
   4 .ARM          00000008  08012838  08012838  00013838  2**2
                   CONTENTS, ALLOC, LOAD, READONLY, DATA
-  5 .preinit_array 00000000  08012840  08012840  000142f8  2**0
+  5 .preinit_array 00000000  08012840  08012840  000142fc  2**0
                   CONTENTS, ALLOC, LOAD, DATA
   6 .init_array   00000004  08012840  08012840  00013840  2**2
                   CONTENTS, ALLOC, LOAD, READONLY, DATA
   7 .fini_array   00000004  08012844  08012844  00013844  2**2
                   CONTENTS, ALLOC, LOAD, READONLY, DATA
-  8 .data         000002f8  24000000  08012848  00014000  2**2
+  8 .data         000002fc  24000000  08012848  00014000  2**2
                   CONTENTS, ALLOC, LOAD, DATA
-  9 .bss          000022a4  240002f8  08012b40  000142f8  2**2
+  9 .bss          000022a0  240002fc  08012b44  000142fc  2**2
                   ALLOC
- 10 ._user_heap_stack 00000604  2400259c  08012b40  0001459c  2**0
+ 10 ._user_heap_stack 00000604  2400259c  08012b44  0001459c  2**0
                   ALLOC
- 11 .ARM.attributes 0000002e  00000000  00000000  000142f8  2**0
+ 11 .ARM.attributes 0000002e  00000000  00000000  000142fc  2**0
                   CONTENTS, READONLY
- 12 .debug_info   000242fc  00000000  00000000  00014326  2**0
+ 12 .debug_info   000242fc  00000000  00000000  0001432a  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 13 .debug_abbrev 00004e6f  00000000  00000000  00038622  2**0
+ 13 .debug_abbrev 00004e6f  00000000  00000000  00038626  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
  14 .debug_aranges 00001af8  00000000  00000000  0003d498  2**3
                   CONTENTS, READONLY, DEBUGGING, OCTETS
@@ -62,7 +62,7 @@ Disassembly of section .text:
  80002b2:	2301      	movs	r3, #1
  80002b4:	7023      	strb	r3, [r4, #0]
  80002b6:	bd10      	pop	{r4, pc}
- 80002b8:	240002f8 	.word	0x240002f8
+ 80002b8:	240002fc 	.word	0x240002fc
  80002bc:	00000000 	.word	0x00000000
  80002c0:	08012410 	.word	0x08012410
 
@@ -75,7 +75,7 @@ Disassembly of section .text:
  80002ce:	f3af 8000 	nop.w
  80002d2:	bd08      	pop	{r3, pc}
  80002d4:	00000000 	.word	0x00000000
- 80002d8:	240002fc 	.word	0x240002fc
+ 80002d8:	24000300 	.word	0x24000300
  80002dc:	08012410 	.word	0x08012410
 
 080002e0 <memchr>:
@@ -1240,10 +1240,10 @@ static void dshot_prepare_dmabuffer_all(uint16_t* motor_value)
  8000b52:	46bd      	mov	sp, r7
  8000b54:	bd80      	pop	{r7, pc}
  8000b56:	bf00      	nop
- 8000b58:	24000314 	.word	0x24000314
- 8000b5c:	2400035c 	.word	0x2400035c
- 8000b60:	240003a4 	.word	0x240003a4
- 8000b64:	240003ec 	.word	0x240003ec
+ 8000b58:	24000318 	.word	0x24000318
+ 8000b5c:	24000360 	.word	0x24000360
+ 8000b60:	240003a8 	.word	0x240003a8
+ 8000b64:	240003f0 	.word	0x240003f0
 
 08000b68 <dshot_dma_start>:
 
@@ -1295,11 +1295,11 @@ static void dshot_dma_start()
  8000bbc:	bf00      	nop
  8000bbe:	bd80      	pop	{r7, pc}
  8000bc0:	2400059c 	.word	0x2400059c
- 8000bc4:	24000314 	.word	0x24000314
+ 8000bc4:	24000318 	.word	0x24000318
  8000bc8:	240004b8 	.word	0x240004b8
- 8000bcc:	2400035c 	.word	0x2400035c
- 8000bd0:	240003a4 	.word	0x240003a4
- 8000bd4:	240003ec 	.word	0x240003ec
+ 8000bcc:	24000360 	.word	0x24000360
+ 8000bd0:	240003a8 	.word	0x240003a8
+ 8000bd4:	240003f0 	.word	0x240003f0
 
 08000bd8 <dshot_enable_dma_request>:
 
@@ -1549,7 +1549,7 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim){
  8000d98:	4770      	bx	lr
  8000d9a:	bf00      	nop
  8000d9c:	24000550 	.word	0x24000550
- 8000da0:	24000444 	.word	0x24000444
+ 8000da0:	24000448 	.word	0x24000448
 
 08000da4 <main>:
 /**
@@ -1821,10 +1821,10 @@ Error_Handler();
  8000f34:	24000550 	.word	0x24000550
  8000f38:	38001000 	.word	0x38001000
  8000f3c:	24000504 	.word	0x24000504
- 8000f40:	24000434 	.word	0x24000434
- 8000f44:	2400044c 	.word	0x2400044c
+ 8000f40:	24000438 	.word	0x24000438
+ 8000f44:	24000450 	.word	0x24000450
  8000f48:	24000490 	.word	0x24000490
- 8000f4c:	24000448 	.word	0x24000448
+ 8000f4c:	2400044c 	.word	0x2400044c
  8000f50:	08012428 	.word	0x08012428
 
 08000f54 <SystemClock_Config>:
@@ -2350,7 +2350,7 @@ void Controle(){
  8001324:	24000008 	.word	0x24000008
  8001328:	240004a4 	.word	0x240004a4
  800132c:	24000480 	.word	0x24000480
- 8001330:	24000454 	.word	0x24000454
+ 8001330:	24000018 	.word	0x24000018
  8001334:	24000458 	.word	0x24000458
  8001338:	24000460 	.word	0x24000460
  800133c:	24000470 	.word	0x24000470
@@ -2699,7 +2699,7 @@ void TIM3_IRQHandler(void)
  800148c:	240004a0 	.word	0x240004a0
  8001490:	ffff00b4 	.word	0xffff00b4
  8001494:	240004a4 	.word	0x240004a4
- 8001498:	24000448 	.word	0x24000448
+ 8001498:	2400044c 	.word	0x2400044c
  800149c:	58020400 	.word	0x58020400
 
 080014a0 <EXTI15_10_IRQHandler>:
@@ -4204,11 +4204,11 @@ LoopFillZerobss:
   ldr r0, =_sdata
  8001d14:	24000000 	.word	0x24000000
   ldr r1, =_edata
- 8001d18:	240002f8 	.word	0x240002f8
+ 8001d18:	240002fc 	.word	0x240002fc
   ldr r2, =_sidata
  8001d1c:	08012848 	.word	0x08012848
   ldr r2, =_sbss
- 8001d20:	240002f8 	.word	0x240002f8
+ 8001d20:	240002fc 	.word	0x240002fc
   ldr r4, =_ebss
  8001d24:	2400259c 	.word	0x2400259c
 
@@ -4354,7 +4354,7 @@ int32_t BSP_LED_Init(Led_TypeDef Led)
  8001e0a:	bf00      	nop
  8001e0c:	58024400 	.word	0x58024400
  8001e10:	08012494 	.word	0x08012494
- 8001e14:	2400001c 	.word	0x2400001c
+ 8001e14:	24000020 	.word	0x24000020
 
 08001e18 <BSP_PB_Init>:
   *            @arg  BUTTON_MODE_GPIO: Button will be used as simple IO
@@ -4480,11 +4480,11 @@ int32_t BSP_PB_Init(Button_TypeDef Button, ButtonMode_TypeDef ButtonMode)
  8001ee0:	bd80      	pop	{r7, pc}
  8001ee2:	bf00      	nop
  8001ee4:	58024400 	.word	0x58024400
- 8001ee8:	24000028 	.word	0x24000028
+ 8001ee8:	2400002c 	.word	0x2400002c
  8001eec:	240007c8 	.word	0x240007c8
  8001ef0:	0801249c 	.word	0x0801249c
- 8001ef4:	2400002c 	.word	0x2400002c
- 8001ef8:	24000030 	.word	0x24000030
+ 8001ef4:	24000030 	.word	0x24000030
+ 8001ef8:	24000034 	.word	0x24000034
 
 08001efc <BSP_PB_IRQHandler>:
   * @brief  BSP Button IRQ handler
@@ -4675,7 +4675,7 @@ __weak HAL_StatusTypeDef MX_USART3_Init(UART_HandleTypeDef *huart, MX_UART_InitT
  8001ff2:	46bd      	mov	sp, r7
  8001ff4:	bd80      	pop	{r7, pc}
  8001ff6:	bf00      	nop
- 8001ff8:	24000018 	.word	0x24000018
+ 8001ff8:	2400001c 	.word	0x2400001c
 
 08001ffc <__io_putchar>:
  #ifdef __GNUC__
@@ -4990,9 +4990,9 @@ __weak HAL_StatusTypeDef HAL_InitTick(uint32_t TickPriority)
  80021c6:	3708      	adds	r7, #8
  80021c8:	46bd      	mov	sp, r7
  80021ca:	bd80      	pop	{r7, pc}
- 80021cc:	24000038 	.word	0x24000038
+ 80021cc:	2400003c 	.word	0x2400003c
  80021d0:	24000000 	.word	0x24000000
- 80021d4:	24000034 	.word	0x24000034
+ 80021d4:	24000038 	.word	0x24000038
 
 080021d8 <HAL_IncTick>:
  * @note This function is declared as __weak to be overwritten in case of other
@@ -5018,7 +5018,7 @@ __weak void HAL_IncTick(void)
  80021f0:	f85d 7b04 	ldr.w	r7, [sp], #4
  80021f4:	4770      	bx	lr
  80021f6:	bf00      	nop
- 80021f8:	24000038 	.word	0x24000038
+ 80021f8:	2400003c 	.word	0x2400003c
  80021fc:	24000868 	.word	0x24000868
 
 08002200 <HAL_GetTick>:
@@ -5092,7 +5092,7 @@ __weak void HAL_Delay(uint32_t Delay)
  8002256:	46bd      	mov	sp, r7
  8002258:	bd80      	pop	{r7, pc}
  800225a:	bf00      	nop
- 800225c:	24000038 	.word	0x24000038
+ 800225c:	2400003c 	.word	0x2400003c
 
 08002260 <HAL_GetREVID>:
 /**
@@ -16962,7 +16962,7 @@ HAL_StatusTypeDef HAL_RCC_ClockConfig(RCC_ClkInitTypeDef  *RCC_ClkInitStruct, ui
  8006d94:	08012484 	.word	0x08012484
  8006d98:	24000004 	.word	0x24000004
  8006d9c:	24000000 	.word	0x24000000
- 8006da0:	24000034 	.word	0x24000034
+ 8006da0:	24000038 	.word	0x24000038
 
 08006da4 <HAL_RCC_GetSysClockFreq>:
   *
@@ -31868,9 +31868,9 @@ static uint8_t USBD_CDC_Init(USBD_HandleTypeDef *pdev, uint8_t cfgidx)
  800ce72:	46bd      	mov	sp, r7
  800ce74:	bd80      	pop	{r7, pc}
  800ce76:	bf00      	nop
- 800ce78:	240000c3 	.word	0x240000c3
- 800ce7c:	240000c4 	.word	0x240000c4
- 800ce80:	240000c5 	.word	0x240000c5
+ 800ce78:	240000c7 	.word	0x240000c7
+ 800ce7c:	240000c8 	.word	0x240000c8
+ 800ce80:	240000c9 	.word	0x240000c9
 
 0800ce84 <USBD_CDC_DeInit>:
   * @param  pdev: device instance
@@ -32014,9 +32014,9 @@ static uint8_t USBD_CDC_DeInit(USBD_HandleTypeDef *pdev, uint8_t cfgidx)
  800cf76:	46bd      	mov	sp, r7
  800cf78:	bd80      	pop	{r7, pc}
  800cf7a:	bf00      	nop
- 800cf7c:	240000c3 	.word	0x240000c3
- 800cf80:	240000c4 	.word	0x240000c4
- 800cf84:	240000c5 	.word	0x240000c5
+ 800cf7c:	240000c7 	.word	0x240000c7
+ 800cf80:	240000c8 	.word	0x240000c8
+ 800cf84:	240000c9 	.word	0x240000c9
 
 0800cf88 <USBD_CDC_Setup>:
   * @param  req: usb requests
@@ -32684,7 +32684,7 @@ static uint8_t *USBD_CDC_GetFSCfgDesc(uint16_t *length)
  800d38a:	46bd      	mov	sp, r7
  800d38c:	bd80      	pop	{r7, pc}
  800d38e:	bf00      	nop
- 800d390:	24000080 	.word	0x24000080
+ 800d390:	24000084 	.word	0x24000084
 
 0800d394 <USBD_CDC_GetHSCfgDesc>:
   *         Return configuration descriptor
@@ -32764,7 +32764,7 @@ static uint8_t *USBD_CDC_GetHSCfgDesc(uint16_t *length)
  800d3fa:	46bd      	mov	sp, r7
  800d3fc:	bd80      	pop	{r7, pc}
  800d3fe:	bf00      	nop
- 800d400:	24000080 	.word	0x24000080
+ 800d400:	24000084 	.word	0x24000084
 
 0800d404 <USBD_CDC_GetOtherSpeedCfgDesc>:
   *         Return configuration descriptor
@@ -32844,7 +32844,7 @@ static uint8_t *USBD_CDC_GetOtherSpeedCfgDesc(uint16_t *length)
  800d46a:	46bd      	mov	sp, r7
  800d46c:	bd80      	pop	{r7, pc}
  800d46e:	bf00      	nop
- 800d470:	24000080 	.word	0x24000080
+ 800d470:	24000084 	.word	0x24000084
 
 0800d474 <USBD_CDC_GetDeviceQualifierDescriptor>:
   *         return Device Qualifier descriptor
@@ -32870,7 +32870,7 @@ uint8_t *USBD_CDC_GetDeviceQualifierDescriptor(uint16_t *length)
  800d488:	46bd      	mov	sp, r7
  800d48a:	f85d 7b04 	ldr.w	r7, [sp], #4
  800d48e:	4770      	bx	lr
- 800d490:	2400003c 	.word	0x2400003c
+ 800d490:	24000040 	.word	0x24000040
 
 0800d494 <USBD_CDC_RegisterInterface>:
   * @param  fops: CD  Interface callback
@@ -33098,7 +33098,7 @@ uint8_t USBD_CDC_TransmitPacket(USBD_HandleTypeDef *pdev)
  800d5be:	46bd      	mov	sp, r7
  800d5c0:	bd80      	pop	{r7, pc}
  800d5c2:	bf00      	nop
- 800d5c4:	240000c3 	.word	0x240000c3
+ 800d5c4:	240000c7 	.word	0x240000c7
 
 0800d5c8 <USBD_CDC_ReceivePacket>:
   *         prepare OUT Endpoint for reception
@@ -33176,7 +33176,7 @@ uint8_t USBD_CDC_ReceivePacket(USBD_HandleTypeDef *pdev)
  800d62a:	3710      	adds	r7, #16
  800d62c:	46bd      	mov	sp, r7
  800d62e:	bd80      	pop	{r7, pc}
- 800d630:	240000c4 	.word	0x240000c4
+ 800d630:	240000c8 	.word	0x240000c8
 
 0800d634 <USBD_Init>:
   * @param  id: Low level core index
@@ -37413,10 +37413,10 @@ void MX_USB_DEVICE_Init(void)
 }
  800ecdc:	bf00      	nop
  800ecde:	bd80      	pop	{r7, pc}
- 800ece0:	240000dc 	.word	0x240000dc
+ 800ece0:	240000e0 	.word	0x240000e0
  800ece4:	24000870 	.word	0x24000870
- 800ece8:	24000048 	.word	0x24000048
- 800ecec:	240000c8 	.word	0x240000c8
+ 800ece8:	2400004c 	.word	0x2400004c
+ 800ecec:	240000cc 	.word	0x240000cc
 
 0800ecf0 <CDC_Init_FS>:
 /**
@@ -37685,7 +37685,7 @@ uint8_t * USBD_FS_DeviceDescriptor(USBD_SpeedTypeDef speed, uint16_t *length)
  800ee94:	46bd      	mov	sp, r7
  800ee96:	f85d 7b04 	ldr.w	r7, [sp], #4
  800ee9a:	4770      	bx	lr
- 800ee9c:	240000fc 	.word	0x240000fc
+ 800ee9c:	24000100 	.word	0x24000100
 
 0800eea0 <USBD_FS_LangIDStrDescriptor>:
   * @param  speed : Current device speed
@@ -37713,7 +37713,7 @@ uint8_t * USBD_FS_LangIDStrDescriptor(USBD_SpeedTypeDef speed, uint16_t *length)
  800eeb8:	46bd      	mov	sp, r7
  800eeba:	f85d 7b04 	ldr.w	r7, [sp], #4
  800eebe:	4770      	bx	lr
- 800eec0:	24000110 	.word	0x24000110
+ 800eec0:	24000114 	.word	0x24000114
 
 0800eec4 <USBD_FS_ProductStrDescriptor>:
   * @param  speed : Current device speed
@@ -37821,7 +37821,7 @@ uint8_t * USBD_FS_SerialStrDescriptor(USBD_SpeedTypeDef speed, uint16_t *length)
  800ef42:	3708      	adds	r7, #8
  800ef44:	46bd      	mov	sp, r7
  800ef46:	bd80      	pop	{r7, pc}
- 800ef48:	24000114 	.word	0x24000114
+ 800ef48:	24000118 	.word	0x24000118
 
 0800ef4c <USBD_FS_ConfigStrDescriptor>:
   * @param  speed : Current device speed
@@ -37969,8 +37969,8 @@ static void Get_SerialNum(void)
  800f008:	1ff1e800 	.word	0x1ff1e800
  800f00c:	1ff1e804 	.word	0x1ff1e804
  800f010:	1ff1e808 	.word	0x1ff1e808
- 800f014:	24000116 	.word	0x24000116
- 800f018:	24000126 	.word	0x24000126
+ 800f014:	2400011a 	.word	0x2400011a
+ 800f018:	2400012a 	.word	0x2400012a
 
 0800f01c <IntToUnicode>:
   * @param  pbuf: pointer to the buffer
@@ -40167,9 +40167,9 @@ USBD_StatusTypeDef USBD_Get_USB_Status(HAL_StatusTypeDef hal_status)
  8010008:	4803      	ldr	r0, [pc, #12]	@ (8010018 <stdio_exit_handler+0x14>)
  801000a:	f000 b869 	b.w	80100e0 <_fwalk_sglue>
  801000e:	bf00      	nop
- 8010010:	24000130 	.word	0x24000130
+ 8010010:	24000134 	.word	0x24000134
  8010014:	08011b61 	.word	0x08011b61
- 8010018:	24000140 	.word	0x24000140
+ 8010018:	24000144 	.word	0x24000144
 
 0801001c <cleanup_stdio>:
  801001c:	6841      	ldr	r1, [r0, #4]
@@ -40305,7 +40305,7 @@ USBD_StatusTypeDef USBD_Get_USB_Status(HAL_StatusTypeDef hal_status)
  801014c:	f85d eb04 	ldr.w	lr, [sp], #4
  8010150:	b003      	add	sp, #12
  8010152:	4770      	bx	lr
- 8010154:	2400013c 	.word	0x2400013c
+ 8010154:	24000140 	.word	0x24000140
  8010158:	ffff0208 	.word	0xffff0208
 
 0801015c <__sread>:
@@ -40380,7 +40380,7 @@ USBD_StatusTypeDef USBD_Get_USB_Status(HAL_StatusTypeDef hal_status)
 080101f4 <_localeconv_r>:
  80101f4:	4800      	ldr	r0, [pc, #0]	@ (80101f8 <_localeconv_r+0x4>)
  80101f6:	4770      	bx	lr
- 80101f8:	2400027c 	.word	0x2400027c
+ 80101f8:	24000280 	.word	0x24000280
 
 080101fc <_close_r>:
  80101fc:	b538      	push	{r3, r4, r5, lr}
@@ -40457,7 +40457,7 @@ USBD_StatusTypeDef USBD_Get_USB_Status(HAL_StatusTypeDef hal_status)
  801028a:	6818      	ldr	r0, [r3, #0]
  801028c:	4770      	bx	lr
  801028e:	bf00      	nop
- 8010290:	2400013c 	.word	0x2400013c
+ 8010290:	24000140 	.word	0x24000140
 
 08010294 <__libc_init_array>:
  8010294:	b570      	push	{r4, r5, r6, lr}
@@ -41702,7 +41702,7 @@ USBD_StatusTypeDef USBD_Get_USB_Status(HAL_StatusTypeDef hal_status)
  8010f3c:	6818      	ldr	r0, [r3, #0]
  8010f3e:	f000 b825 	b.w	8010f8c <_malloc_r>
  8010f42:	bf00      	nop
- 8010f44:	2400013c 	.word	0x2400013c
+ 8010f44:	24000140 	.word	0x24000140
 
 08010f48 <sbrk_aligned>:
  8010f48:	b570      	push	{r4, r5, r6, lr}
@@ -43069,7 +43069,7 @@ USBD_StatusTypeDef USBD_Get_USB_Status(HAL_StatusTypeDef hal_status)
  8011c46:	4b04      	ldr	r3, [pc, #16]	@ (8011c58 <__assert_func+0x38>)
  8011c48:	e7f4      	b.n	8011c34 <__assert_func+0x14>
  8011c4a:	bf00      	nop
- 8011c4c:	2400013c 	.word	0x2400013c
+ 8011c4c:	24000140 	.word	0x24000140
  8011c50:	0801272e 	.word	0x0801272e
  8011c54:	08012700 	.word	0x08012700
  8011c58:	080126f3 	.word	0x080126f3
@@ -43179,7 +43179,7 @@ USBD_StatusTypeDef USBD_Get_USB_Status(HAL_StatusTypeDef hal_status)
  8011d38:	f85d eb04 	ldr.w	lr, [sp], #4
  8011d3c:	b003      	add	sp, #12
  8011d3e:	4770      	bx	lr
- 8011d40:	2400013c 	.word	0x2400013c
+ 8011d40:	24000140 	.word	0x24000140
 
 08011d44 <abort>:
  8011d44:	b508      	push	{r3, lr}
@@ -43596,7 +43596,7 @@ USBD_StatusTypeDef USBD_Get_USB_Status(HAL_StatusTypeDef hal_status)
  8012102:	e7f4      	b.n	80120ee <__swsetup_r+0x8e>
  8012104:	2000      	movs	r0, #0
  8012106:	e7f7      	b.n	80120f8 <__swsetup_r+0x98>
- 8012108:	2400013c 	.word	0x2400013c
+ 8012108:	24000140 	.word	0x24000140
 
 0801210c <_raise_r>:
  801210c:	291f      	cmp	r1, #31
@@ -43640,7 +43640,7 @@ USBD_StatusTypeDef USBD_Get_USB_Status(HAL_StatusTypeDef hal_status)
  8012160:	6818      	ldr	r0, [r3, #0]
  8012162:	f7ff bfd3 	b.w	801210c <_raise_r>
  8012166:	bf00      	nop
- 8012168:	2400013c 	.word	0x2400013c
+ 8012168:	24000140 	.word	0x24000140
 
 0801216c <_kill_r>:
  801216c:	b538      	push	{r3, r4, r5, lr}
