@@ -74,7 +74,7 @@ void Controle(){
 		error[n] =ref[n] -  speed[n];
 		deltaU[n] = Kc*(error[n]- preverror[n]) + error[n]*Ki -Kd*(speed[n]-2*prevspeed[n] + prevspeed2[n]);
 		deltaU[n] = floor(deltaU[n]);
-		uM[n] = deltaU[n];
+		uM[n] = uM[n] + deltaU[n];
 		//saturador
 		if( uM[n] < -1023){
 			uM[n]= -1023;
