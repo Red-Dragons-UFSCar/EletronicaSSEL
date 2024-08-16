@@ -179,7 +179,7 @@ Error_Handler();
 	//initialize inter-core status pointers
 	xfr_ptr->sts_4to7 = 0;
 	xfr_ptr->sts_7to4 = 0;
-	extern uint16_t uM[4];
+	extern uint16_t D[4];
 
 	dshot_init(DSHOT150);
 	  if (HAL_TIM_Base_Start_IT(&htim3) != HAL_OK)
@@ -211,6 +211,7 @@ Error_Handler();
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   char message[40]={'\0'};
+  uint16_t zero[4] = {0,0,0,0};
   while (1)
   {
 	  // if  M4 to M7 buffer has data
@@ -231,17 +232,19 @@ Error_Handler();
 	  	  motores[0]=0;
 	  	  if(count<5000){
 	  		  ref[0] = 0;
-
+	  		dshot_write(zero);
 	  	  } else if(count>=5000){
-	  		  ref[0] = 9;
+	  		  ref[0] = -6;
+	  		  dshot_write(D);
 
 	  	  } else if(count >= 15000){
-	  		  ref[0] = 6;
+	  		  ref[0] = -6;
+	  		  dshot_write(D);
 	  	  }
-	  	  dshot_write(uM);
+
 	  	  count++;
 
-	  	  sprintf(message, "velocidade : %f \n \r",velocidade);
+	  	  sprintf(message, "%f \n \r",velocidade);
 	  	  CDC_Transmit_FS(message,sizeof(message));
 	  	  HAL_Delay(1);
     /* USER CODE END WHILE */

@@ -46,13 +46,14 @@ extern uint16_t counter[4];
 
 
 extern float ref[4];
-static float Kc =1.2 ;
-static float Ki = 0 ;
+static float Kc =10 ;
+static float Ki = 3 ;
 static float Kd = 0;
 volatile float prevspeed[4]={0,0,0,0};
 volatile float prevspeed2[4] = {0,0,0,0};
 volatile float preverror[4]= {0,0,0,0};
-volatile uint16_t uM[4] = {0,0,0,0};
+volatile uint16_t D[4]= {0,0,0,0};
+volatile float uM[4] = {0,0,0,0};
 uint8_t cont = 0;
 uint32_t Enc_1 = 0;
 int vel_1 = 0;
@@ -66,6 +67,11 @@ float speed[4];
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+
+float map(float x, uint16_t in_min, uint16_t in_max, uint16_t out_min, uint16_t out_max) {
+  return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+}
+
 void Controle(){
 	float error[4];
 	float deltaU[4];
@@ -76,17 +82,23 @@ void Controle(){
 		deltaU[n] = floor(deltaU[n]);
 		uM[n] = uM[n] + deltaU[n];
 		//saturador
-		if( uM[n] < -1023){
+		if( uM[n] <= -1024){
 			uM[n]= -1023;
 		}
-		if(uM[n]>1024){
+		if(uM[n]>=1024){
 			uM[n]= 1023;
-		} if(uM[n]<0){
+
+		} if(uM[n]<=0){
 			uM[n]=uM[n]*(-1)+1024;
 		}
-
-
+		if(uM[n]<1024){
+			map(uM[n],0,1023,500,1023);
+		} else if (uM[n]>1024){
+			map(uM[n],1024,2047,1524,2047);
+		}
+		D[n] = uM[n];
 	}
+
 
 	cont = cont +1;
 	if(cont == 1){
