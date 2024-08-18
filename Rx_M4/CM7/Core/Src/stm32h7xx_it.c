@@ -42,22 +42,33 @@
 
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN PV */
-extern uint16_t counter[4];
+//Controlador
 
-
+//Referência de velocidade (Vindo da main)
 extern float ref[4];
+//Constantes de Controle
 static float Kc =25 ;
 static float Ki = 3 ;
 static float Kd = 0.005;
+// Erro
+volatile float error[4] = {0,0,0,0};
+//Varição da ação de controle
+volatile float deltaU[4] = {0,0,0,0};
+//Ação de Controle
+volatile float uM[4] = {0,0,0,0};
+//Velocidades e erros anteriores
 volatile float prevspeed[4]={0,0,0,0};
 volatile float prevspeed2[4] = {0,0,0,0};
 volatile float preverror[4]= {0,0,0,0};
-volatile uint16_t D[4]= {0,0,0,0};
-volatile float uM[4] = {0,0,0,0};
+//Contador para salvar as variaveis
 uint8_t cont = 0;
-uint32_t Enc_1 = 0;
-int vel_1 = 0;
-float speed[4];
+//Valores de DSHOT enviado para os motores
+volatile uint16_t D[4]= {0,0,0,0};
+//Variavejs de valor de encoder e calculo de velocidade
+uint32_t Enc[4] = {0,0,0,0};
+volatile int vel[4] = {0,0,0,0};
+volatile float speed[4] = {0,0,0,0};
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -68,37 +79,35 @@ float speed[4];
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
+//Função de mapeamento
 uint16_t map(float x, int in_min, int in_max, int out_min, int out_max) {
   return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 }
 
 void Controle(){
-	float error[4];
-	float deltaU[4];
 
 	for(uint8_t n=0;n<4;n++){
+		//Calculo de erro
 		error[n] =ref[n] -  speed[n];
+		//Variação da ação de controle para esta iteração
 		deltaU[n] = Kc*(error[n]- preverror[n]) + error[n]*Ki -Kd*(speed[n]-2*prevspeed[n] + prevspeed2[n]);
+		//Ação de controle
 		uM[n] = uM[n] + deltaU[n];
-		//saturador
+		//Saturado para evitar que a ação de controle ultrapasse o limite
 		if( uM[n] < -1023){
 			uM[n]= -1023;
 		}
 		if(uM[n]>1023){
 			uM[n]= 1023;
 		}
-		//if(uM< 0){
-		//	D[n] = uM[n]*(-1)+1024;
-		//} else {
-		//	D[n] = uM[n];
-		//}
+		//Mapeamento da variavel de ação de controle no alcançe dado
 		if(uM[n]>=0)
 			D[n] = map(uM[n],0,1023,200,1023);
 		else if(uM[n]<0)
 			D[n]= map(uM[n],-1023,0,2047,1224);
 	}
 
-
+	//Logica para salvar o erro e a velocidade anterior
 	cont = cont +1;
 	if(cont == 1){
 		for(uint8_t n=0;n<4;n++){
@@ -332,13 +341,13 @@ void TIM3_IRQHandler(void)
   /* USER CODE END TIM3_IRQn 0 */
   HAL_TIM_IRQHandler(&htim3);
   /* USER CODE BEGIN TIM3_IRQn 1 */
-  Enc_1 = TIM4->CNT;
+  Enc[0] = TIM4->CNT;
   TIM4->CNT = 0;
-  vel_1 = Enc_1;
-  if(vel_1>60000){
-		  vel_1 = vel_1 - 65356;
+  vel[0] = Enc[0];
+  if(vel[0]>60000){
+		  vel[0] = vel[0] - 65356;
   }
-  speed[0] = vel_1/(81.92);
+  speed[0] = vel[0]/(81.92);
   velocidade = speed[0];
   Controle();
 
