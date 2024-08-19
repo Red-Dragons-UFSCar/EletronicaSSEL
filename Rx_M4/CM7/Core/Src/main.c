@@ -172,9 +172,13 @@ Error_Handler();
   MX_USB_DEVICE_Init();
   MX_TIM1_Init();
   MX_TIM8_Init();
+  MX_TIM15_Init();
   /* USER CODE BEGIN 2 */
   int count = 0;
   HAL_TIM_Encoder_Start_IT(&htim4, TIM_CHANNEL_ALL);
+  HAL_TIM_Encoder_Start_IT(&htim1, TIM_CHANNEL_ALL);
+  HAL_TIM_Encoder_Start_IT(&htim8, TIM_CHANNEL_ALL);
+  HAL_TIM_Encoder_Start_IT(&htim3, TIM_CHANNEL_ALL);
 	uint8_t * xfr_data; // pointer to transfer data
 
 

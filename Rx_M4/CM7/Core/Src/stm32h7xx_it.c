@@ -132,7 +132,7 @@ extern DMA_HandleTypeDef hdma_tim2_ch1;
 extern DMA_HandleTypeDef hdma_tim2_ch3;
 extern DMA_HandleTypeDef hdma_tim5_ch2;
 extern DMA_HandleTypeDef hdma_tim5_ch4;
-extern TIM_HandleTypeDef htim3;
+extern TIM_HandleTypeDef htim15;
 /* USER CODE BEGIN EV */
 extern TIM_HandleTypeDef htim4;
 extern float velocidade;
@@ -333,30 +333,6 @@ void DMA1_Stream5_IRQHandler(void)
 }
 
 /**
-  * @brief This function handles TIM3 global interrupt.
-  */
-void TIM3_IRQHandler(void)
-{
-  /* USER CODE BEGIN TIM3_IRQn 0 */
-
-  /* USER CODE END TIM3_IRQn 0 */
-  HAL_TIM_IRQHandler(&htim3);
-  /* USER CODE BEGIN TIM3_IRQn 1 */
-  Enc[0] = TIM4->CNT;
-  TIM4->CNT = 0;
-  vel[0] = Enc[0];
-  if(vel[0]>60000){
-		  vel[0] = vel[0] - 65356;
-  }
-  speed[0] = vel[0]/(81.92);
-  velocidade = speed[0];
-  Controle();
-
-  HAL_GPIO_TogglePin(GPIOB,GPIO_PIN_14);
-  /* USER CODE END TIM3_IRQn 1 */
-}
-
-/**
   * @brief This function handles EXTI line[15:10] interrupts.
   */
 void EXTI15_10_IRQHandler(void)
@@ -382,6 +358,30 @@ void OTG_FS_IRQHandler(void)
   /* USER CODE BEGIN OTG_FS_IRQn 1 */
 
   /* USER CODE END OTG_FS_IRQn 1 */
+}
+
+/**
+  * @brief This function handles TIM15 global interrupt.
+  */
+void TIM15_IRQHandler(void)
+{
+  /* USER CODE BEGIN TIM15_IRQn 0 */
+
+  /* USER CODE END TIM15_IRQn 0 */
+  HAL_TIM_IRQHandler(&htim15);
+  /* USER CODE BEGIN TIM15_IRQn 1 */
+  Enc[0] = TIM4->CNT;
+  TIM4->CNT = 0;
+  vel[0] = Enc[0];
+  if(vel[0]>60000){
+		  vel[0] = vel[0] - 65356;
+  }
+  speed[0] = vel[0]/(81.92);
+  velocidade = speed[0];
+  Controle();
+
+  HAL_GPIO_TogglePin(GPIOB,GPIO_PIN_14);
+  /* USER CODE END TIM15_IRQn 1 */
 }
 
 /* USER CODE BEGIN 1 */
