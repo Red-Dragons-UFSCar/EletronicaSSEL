@@ -170,6 +170,8 @@ Error_Handler();
   MX_TIM3_Init();
   MX_TIM4_Init();
   MX_USB_DEVICE_Init();
+  MX_TIM1_Init();
+  MX_TIM8_Init();
   /* USER CODE BEGIN 2 */
   int count = 0;
   HAL_TIM_Encoder_Start_IT(&htim4, TIM_CHANNEL_ALL);

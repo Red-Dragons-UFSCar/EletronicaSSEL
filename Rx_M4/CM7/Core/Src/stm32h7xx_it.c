@@ -101,10 +101,11 @@ void Controle(){
 			uM[n]= 1023;
 		}
 		//Mapeamento da variavel de ação de controle no alcançe dado
-		if(uM[n]>=0)
+		if(uM[n]>=0){
 			D[n] = map(uM[n],0,1023,200,1023);
-		else if(uM[n]<0)
+		}else if(uM[n]<0){
 			D[n]= map(uM[n],-1023,0,2047,1224);
+		}
 	}
 
 	//Logica para salvar o erro e a velocidade anterior
