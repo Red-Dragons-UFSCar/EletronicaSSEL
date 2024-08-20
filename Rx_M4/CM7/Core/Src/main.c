@@ -55,7 +55,7 @@ COM_InitTypeDef BspCOMInit;
 /* USER CODE BEGIN PV */
 uint8_t Mensagem[32];
 uint32_t contador =0;
-float velocidade=0;
+float velocidade[4]={0,0,0,0};
 float ref[4] = {0,0,0,0};
 
 
@@ -188,7 +188,7 @@ Error_Handler();
 	extern uint16_t D[4];
 
 	dshot_init(DSHOT300);
-	  if (HAL_TIM_Base_Start_IT(&htim3) != HAL_OK)
+	  if (HAL_TIM_Base_Start_IT(&htim15) != HAL_OK)
 	    {
 	      /* Starting Error */
 	      Error_Handler();
@@ -216,7 +216,7 @@ Error_Handler();
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  char message[40]={'\0'};
+  char message[100]={'\0'};
   uint16_t zero[4] = {0,0,0,0};
   uint16_t bi[4] = {2045,0,0,0};
   while (1)
@@ -250,8 +250,7 @@ Error_Handler();
 	  	  }
 
 	  	  count++;
-
-	  	  sprintf(message, "%f \n \r", velocidade);
+	  	  sprintf(message, "%f oi %f oi %f io %f \n \r",velocidade[0],velocidade[1],velocidade[2],velocidade[3]);
 	  	  CDC_Transmit_FS(message,sizeof(message));
 	  	  HAL_Delay(1);
     /* USER CODE END WHILE */

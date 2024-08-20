@@ -130,12 +130,15 @@ void Controle(){
 extern PCD_HandleTypeDef hpcd_USB_OTG_FS;
 extern DMA_HandleTypeDef hdma_tim2_ch1;
 extern DMA_HandleTypeDef hdma_tim2_ch3;
-extern DMA_HandleTypeDef hdma_tim5_ch2;
 extern DMA_HandleTypeDef hdma_tim5_ch4;
+extern DMA_HandleTypeDef hdma_tim5_ch2;
 extern TIM_HandleTypeDef htim15;
 /* USER CODE BEGIN EV */
 extern TIM_HandleTypeDef htim4;
-extern float velocidade;
+extern TIM_HandleTypeDef htim3;
+extern TIM_HandleTypeDef htim1;
+extern TIM_HandleTypeDef htim8;
+extern float velocidade[4];
 /* USER CODE END EV */
 
 /******************************************************************************/
@@ -370,14 +373,28 @@ void TIM15_IRQHandler(void)
   /* USER CODE END TIM15_IRQn 0 */
   HAL_TIM_IRQHandler(&htim15);
   /* USER CODE BEGIN TIM15_IRQn 1 */
+  //
   Enc[0] = TIM4->CNT;
+  Enc[1] = TIM1->CNT;
+  Enc[2] = TIM8->CNT;
+  Enc[3] = TIM3->CNT;
   TIM4->CNT = 0;
-  vel[0] = Enc[0];
-  if(vel[0]>60000){
-		  vel[0] = vel[0] - 65356;
+  TIM1->CNT = 0;
+  TIM8->CNT = 0;
+  TIM3->CNT = 0;
+
+  for(uint8_t i=0;i<4;i++){
+	  vel[i] = Enc[i];
+	  if(vel[i]>60000){
+			  vel[i] = vel[i] - 65356;
+	  }
+	  speed[i] = vel[i]/(81.92);
+	  velocidade[i] = speed[i];
   }
-  speed[0] = vel[0]/(81.92);
-  velocidade = speed[0];
+
+
+
+  //velocidade = speed[0];
   Controle();
 
   HAL_GPIO_TogglePin(GPIOB,GPIO_PIN_14);
