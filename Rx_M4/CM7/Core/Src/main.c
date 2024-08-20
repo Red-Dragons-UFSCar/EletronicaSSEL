@@ -243,18 +243,19 @@ Error_Handler();
 	  	  }
 	  	  */
 	  	  motores[0]=0;
-	  	  if(count<5000){
-	  		  ref[0] = 0;
-	  		dshot_write(zero);
-	  	  } else if(count>=5000){
-	  		  ref[0] = -6;
-	  		  dshot_write(D);
+	  	  for(uint8_t i;i<4;i++){
+			  if(count<5000){
+				  ref[i] = 0;
+			  } else if(count>=5000){
+				  ref[i] = -6;
 
-	  	  } else if(count >= 15000){
-	  		  ref[0] = -6;
-	  		  dshot_write(D);
+
+			  } else if(count >= 15000){
+				  ref[i] = -6;
+
+			  }
 	  	  }
-
+	  	  dshot_write(D);
 	  	  count++;
 	  	  sprintf(message, "%f oi %f oi %f io %f \n \r",velocidade[0],velocidade[1],velocidade[2],velocidade[3]);
 	  	  CDC_Transmit_FS(message,sizeof(message));
