@@ -49,7 +49,7 @@ extern float ref[4];
 //Constantes de Controle
 static float Kc =25 ;
 static float Ki = 3 ;
-static float Kd = 0.005;
+static float Kd = 0;
 // Erro
 volatile float error[4] = {0,0,0,0};
 //Varição da ação de controle
@@ -101,12 +101,12 @@ void Controle(){
 			uM[n]= 1023;
 		}
 		//Mapeamento da variavel de ação de controle no alcançe dado
-		if(uM[n]>=0 && ref[n]!=0 ){
-			D[n] = map(uM[n],0,1023,200,1023);
-		}else if(uM[n]<0 && ref[n]!=0){
-			D[n]= map(uM[n],-1023,0,2047,1224);
-		} else {
+		if(ref[n]==0){
 			D[n]=0;
+		}else if(uM[n]>=0 ){
+			D[n] = map(uM[n],0,1023,0,1023);
+		}else if(uM[n]<0){
+			D[n]= map(uM[n],-1023,0,2047,1023);
 		}
 	}
 
@@ -134,6 +134,7 @@ extern DMA_HandleTypeDef hdma_tim2_ch1;
 extern DMA_HandleTypeDef hdma_tim2_ch3;
 extern DMA_HandleTypeDef hdma_tim5_ch4;
 extern DMA_HandleTypeDef hdma_tim5_ch2;
+extern TIM_HandleTypeDef htim4;
 extern TIM_HandleTypeDef htim15;
 /* USER CODE BEGIN EV */
 extern TIM_HandleTypeDef htim4;
@@ -335,6 +336,20 @@ void DMA1_Stream5_IRQHandler(void)
   /* USER CODE BEGIN DMA1_Stream5_IRQn 1 */
 
   /* USER CODE END DMA1_Stream5_IRQn 1 */
+}
+
+/**
+  * @brief This function handles TIM4 global interrupt.
+  */
+void TIM4_IRQHandler(void)
+{
+  /* USER CODE BEGIN TIM4_IRQn 0 */
+
+  /* USER CODE END TIM4_IRQn 0 */
+  HAL_TIM_IRQHandler(&htim4);
+  /* USER CODE BEGIN TIM4_IRQn 1 */
+
+  /* USER CODE END TIM4_IRQn 1 */
 }
 
 /**

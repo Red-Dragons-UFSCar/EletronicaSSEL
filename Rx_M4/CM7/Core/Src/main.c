@@ -225,6 +225,18 @@ Error_Handler();
   char message[100]={'\0'};
   uint16_t zero[4] = {0,0,0,0};
   uint16_t bi[4] = {2045,0,0,0};
+  uint8_t robonum;
+  GPIO_PinState PinState[2];
+  //definicao do robo por meio da entrada de tensao no pinc10 e Pinc11//
+  PinState[0]= HAL_GPIO_ReadPin(GPIOC,GPIO_PIN_10);
+  PinState[1]= HAL_GPIO_ReadPin(GPIOC,GPIO_PIN_11);
+  if((PinState[0]==0)&&(PinState[1]==0))
+	  robonum=0;
+  if(PinState[0]==1)
+	  robonum=1;
+  if(PinState[1]==1)
+	  robonum=2;
+
   while (1)
   {
 	  // if  M4 to M7 buffer has data
@@ -243,19 +255,22 @@ Error_Handler();
 	  	  }
 	  	  */
 	  	  motores[0]=0;
-	  	  for(uint8_t i;i<4;i++){
+	  	  for(uint8_t i=0;i<4;i++){
 			  if(count<5000){
 				  ref[i] = 0;
-			  } else if(count>=5000){
-				  ref[i] = -6;
 
+			  } else if(count>=5000){
+				  ref[i] = 0;
+				  ref[3] = 6;
 
 			  } else if(count >= 15000){
-				  ref[i] = -6;
-
+				  ref[i] = 0;
+				  ref[3] = 6;
 			  }
 	  	  }
+
 	  	  dshot_write(D);
+
 	  	  count++;
 	  	  sprintf(message, "%f oi %f oi %f io %f \n \r",velocidade[0],velocidade[1],velocidade[2],velocidade[3]);
 	  	  CDC_Transmit_FS(message,sizeof(message));
