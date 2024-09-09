@@ -1,6 +1,6 @@
 Drivers/BSP/STM32H7xx_Nucleo/stm32h7xx_nucleo.o: \
- D:/StWorkspace/Tx_M4/Drivers/BSP/STM32H7xx_Nucleo/stm32h7xx_nucleo.c \
- D:/StWorkspace/Tx_M4/Drivers/BSP/STM32H7xx_Nucleo/stm32h7xx_nucleo.h \
+ D:/StWorkspace/EletronicaSSEL/Tx_M4/Drivers/BSP/STM32H7xx_Nucleo/stm32h7xx_nucleo.c \
+ D:/StWorkspace/EletronicaSSEL/Tx_M4/Drivers/BSP/STM32H7xx_Nucleo/stm32h7xx_nucleo.h \
  ../Core/Inc/stm32h7xx_nucleo_conf.h \
  ../../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal.h \
  ../Core/Inc/stm32h7xx_hal_conf.h \
@@ -34,8 +34,8 @@ Drivers/BSP/STM32H7xx_Nucleo/stm32h7xx_nucleo.o: \
  ../../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_spi_ex.h \
  ../../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_uart.h \
  ../../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_uart_ex.h \
- D:/StWorkspace/Tx_M4/Drivers/BSP/STM32H7xx_Nucleo/stm32h7xx_nucleo_errno.h
-D:/StWorkspace/Tx_M4/Drivers/BSP/STM32H7xx_Nucleo/stm32h7xx_nucleo.h:
+ D:/StWorkspace/EletronicaSSEL/Tx_M4/Drivers/BSP/STM32H7xx_Nucleo/stm32h7xx_nucleo_errno.h
+D:/StWorkspace/EletronicaSSEL/Tx_M4/Drivers/BSP/STM32H7xx_Nucleo/stm32h7xx_nucleo.h:
 ../Core/Inc/stm32h7xx_nucleo_conf.h:
 ../../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal.h:
 ../Core/Inc/stm32h7xx_hal_conf.h:
@@ -69,4 +69,4 @@ D:/StWorkspace/Tx_M4/Drivers/BSP/STM32H7xx_Nucleo/stm32h7xx_nucleo.h:
 ../../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_spi_ex.h:
 ../../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_uart.h:
 ../../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_uart_ex.h:
-D:/StWorkspace/Tx_M4/Drivers/BSP/STM32H7xx_Nucleo/stm32h7xx_nucleo_errno.h:
+D:/StWorkspace/EletronicaSSEL/Tx_M4/Drivers/BSP/STM32H7xx_Nucleo/stm32h7xx_nucleo_errno.h:

@@ -170,8 +170,13 @@ int main(void)
 		 		 }
 	 }
 	 ret = NRF_TransmitAndWait(TxData, 32);
+	 if(ret == NRF_OK){
+		 HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_14);
+	 } else {
+		 HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_0);
+	 }
 	 count = count+2;
-	  HAL_Delay(2);
+	  HAL_Delay(1000);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */

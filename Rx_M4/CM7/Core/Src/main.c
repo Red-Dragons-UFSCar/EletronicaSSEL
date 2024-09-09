@@ -193,12 +193,13 @@ Error_Handler();
 	xfr_ptr->sts_7to4 = 0;
 	extern uint16_t D[4];
 
-	dshot_init(DSHOT300);
+
 	  if (HAL_TIM_Base_Start_IT(&htim15) != HAL_OK)
 	    {
 	      /* Starting Error */
 	      Error_Handler();
 	    }
+	  dshot_init(DSHOT300);
   /* USER CODE END 2 */
 
   /* Initialize leds */
@@ -256,25 +257,27 @@ Error_Handler();
 	  	  */
 	  	  motores[0]=0;
 	  	  for(uint8_t i=0;i<4;i++){
-			  if(count<5000){
-				  ref[i] = 0;
+	  		if(count<300){
+	  			ref[i]=0;
+	  		} else if (count>=300 && count<500){
+	  			ref[i] = 7;
+	  		}
+	  		else if(count>=500 && count<700){
+	  			ref[i] = ref[i]+0.05;
+	  		} else if(count>=700 && count<900){
+	  			ref[i] = ref[i] - 0.05;
+	  		} else if(count>=900){
+	  			count = 300;
+	  		}
+	  	 }
 
-			  } else if(count>=5000){
-				  ref[i] = 0;
-				  ref[3] = 6;
 
-			  } else if(count >= 15000){
-				  ref[i] = 0;
-				  ref[3] = 6;
-			  }
-	  	  }
 
-	  	  dshot_write(D);
 
 	  	  count++;
-	  	  sprintf(message, "%f oi %f oi %f io %f \n \r",velocidade[0],velocidade[1],velocidade[2],velocidade[3]);
+	  	  sprintf(message, "%f\n \r",velocidade[2]);
 	  	  CDC_Transmit_FS(message,sizeof(message));
-	  	  HAL_Delay(1);
+	  	  HAL_Delay(10);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */

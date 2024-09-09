@@ -62,8 +62,8 @@ all: main-build
 main-build: Tx_M4_CM4.elf secondary-outputs
 
 # Tool invocations
-Tx_M4_CM4.elf Tx_M4_CM4.map: $(OBJS) $(USER_OBJS) D:\StWorkspace\Tx_M4\CM4\STM32H755ZITX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "Tx_M4_CM4.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"D:\StWorkspace\Tx_M4\CM4\STM32H755ZITX_FLASH.ld" --specs=nosys.specs -Wl,-Map="Tx_M4_CM4.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+Tx_M4_CM4.elf Tx_M4_CM4.map: $(OBJS) $(USER_OBJS) D:\StWorkspace\EletronicaSSEL\Tx_M4\CM4\STM32H755ZITX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "Tx_M4_CM4.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"D:\StWorkspace\EletronicaSSEL\Tx_M4\CM4\STM32H755ZITX_FLASH.ld" --specs=nosys.specs -Wl,-Map="Tx_M4_CM4.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 

@@ -24,4 +24,4 @@
 ../Core/Src/nrf24l01.c:371:12:NRF_ReadPayload	16	static
 ../Core/Src/nrf24l01.c:376:12:NRF_Transmit	24	static
 ../Core/Src/nrf24l01.c:390:6:NRF_ReTransmit	8	static
-../Core/Src/nrf24l01.c:396:12:NRF_TransmitAndWait	24	static
+../Core/Src/nrf24l01.c:396:12:NRF_TransmitAndWait	32	static

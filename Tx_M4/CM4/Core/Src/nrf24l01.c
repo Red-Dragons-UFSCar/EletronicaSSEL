@@ -407,18 +407,18 @@ NRF_Status NRF_TransmitAndWait(uint8_t *payload, uint8_t length) {
 
   // Wait for status update
   uint8_t status;
+  int contador = 0;
   for (;;) {
     status = NRF_ReadStatus();
     if (status & (1<<STATUS_BIT_TX_DS)) {
       // Packet transmitted
       ret = NRF_SetRegisterBit(NRF_REG_STATUS, STATUS_BIT_TX_DS); // clear flag
       break;
-    } else if (status & (1<<STATUS_BIT_MAX_RT)) {
-      // Max retransmits reached
-      NRF_SetRegisterBit(NRF_REG_STATUS, STATUS_BIT_MAX_RT); // clear flag
-      ret = NRF_MAX_RT;
-      break;
+    }else if (contador == 20){
+    	ret = NRF_ERROR;
+    	break;
     }
+    contador++;
   }
   ce_reset();
 

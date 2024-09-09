@@ -23,6 +23,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "stm32h7xx.h"
+#include "dshot.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -49,7 +50,7 @@ extern float ref[4];
 //Constantes de Controle
 static float Kc =25 ;
 static float Ki = 3 ;
-static float Kd = 0;
+static float Kd = 0.005;
 // Erro
 volatile float error[4] = {0,0,0,0};
 //Varição da ação de controle
@@ -85,7 +86,6 @@ uint16_t map(float x, int in_min, int in_max, int out_min, int out_max) {
 }
 
 void Controle(){
-
 	for(uint8_t n=0;n<4;n++){
 		//Calculo de erro
 		error[n] =ref[n] -  speed[n];
@@ -408,7 +408,7 @@ void TIM15_IRQHandler(void)
 	  speed[i] = vel[i]/(81.92);
 	  velocidade[i] = speed[i];
   }
-
+  dshot_write(D);
 
 
   //velocidade = speed[0];
