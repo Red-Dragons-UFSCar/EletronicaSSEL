@@ -49,8 +49,7 @@ SPI_HandleTypeDef hspi1;
 
 /* USER CODE BEGIN PV */
 uint8_t TxAdress[] = {1,2,3,4,5};
-uint8_t TxData[]="Pao De Batata";
-uint8_t RxAdress[] = {0xEE,0xDD,0xCC,0xBB,0xAA};
+uint8_t TxData[32]={111,60,70,80,90,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,112};
 uint8_t RxData[32];
 uint8_t ReadMemManco = 0;
 /* USER CODE END PV */
@@ -148,7 +147,7 @@ int main(void)
   MX_SPI1_Init();
   /* USER CODE BEGIN 2 */
   Tx_mode(TxAdress);
-  int count = 0;
+
   NRF_Status ret = NRF_OK;
   /* USER CODE END 2 */
 
@@ -156,27 +155,14 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	 if(count<2000){
-		 for(uint8_t n;n<4;n++){
-			 TxData[n]=0;
-		 }
-	 } else if(count>2000 && count<7000) {
-		 for(uint8_t n;n<4;n++){
-		 	TxData[n]=100;
-		 }
-	 } else if(count>7000){
-		 for(uint8_t n;n<4;n++){
-		 		 	TxData[n]=220;
-		 		 }
-	 }
+
 	 ret = NRF_TransmitAndWait(TxData, 32);
 	 if(ret == NRF_OK){
 		 HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_14);
 	 } else {
 		 HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_0);
 	 }
-	 count = count+2;
-	  HAL_Delay(1000);
+	  HAL_Delay(100);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */

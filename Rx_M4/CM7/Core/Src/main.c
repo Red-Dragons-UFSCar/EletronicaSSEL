@@ -54,7 +54,8 @@
 COM_InitTypeDef BspCOMInit;
 
 /* USER CODE BEGIN PV */
-uint8_t Mensagem[32];
+uint8_t new_mensagem[32]= {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+uint8_t old_mensagem[32]={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 uint32_t contador =0;
 float velocidade[4]={0,0,0,0};
 float ref[4] = {0,0,0,0};
@@ -191,7 +192,6 @@ Error_Handler();
 	//initialize inter-core status pointers
 	xfr_ptr->sts_4to7 = 0;
 	xfr_ptr->sts_7to4 = 0;
-	extern uint16_t D[4];
 
 
 	  if (HAL_TIM_Base_Start_IT(&htim15) != HAL_OK)
@@ -224,8 +224,6 @@ Error_Handler();
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   char message[100]={'\0'};
-  uint16_t zero[4] = {0,0,0,0};
-  uint16_t bi[4] = {2045,0,0,0};
   uint8_t robonum;
   GPIO_PinState PinState[2];
   //definicao do robo por meio da entrada de tensao no pinc10 e Pinc11//
@@ -238,44 +236,35 @@ Error_Handler();
   if(PinState[1]==1)
 	  robonum=2;
 
+  for(uint8_t i =0;i<4;i++){
+	  ref[i] =0;
+  }
+  HAL_Delay(7000);
   while (1)
   {
 	  // if  M4 to M7 buffer has data
-
-	  /*
 	  	  if (xfr_ptr->sts_4to7 == 1)
 	  	  {
 	  		  xfr_data = get_M4(); // get data sent from M4 to M7
 	  	  }
+
 	  	  for(uint8_t n = 0; n<32;n++){
-	  		  Mensagem[n] = xfr_data[n];
+	  		  new_mensagem[n] = xfr_data[n];
 	  	  }
-	  	  for(int n=0;n<4;n++){
-	  		  motores[n] = (Mensagem[n]*2048)/255;
 
+	  	  if((new_mensagem[0]==111)&&(new_mensagem[31]==112)){
+	  		for(uint8_t n=0;n<32;n++)
+	  		  old_mensagem[n] = new_mensagem[n];
 	  	  }
-	  	  */
-	  	  motores[0]=0;
-	  	  for(uint8_t i=0;i<4;i++){
-	  		if(count<300){
-	  			ref[i]=0;
-	  		} else if (count>=300 && count<500){
-	  			ref[i] = 7;
-	  		}
-	  		else if(count>=500 && count<700){
-	  			ref[i] = ref[i]+0.05;
-	  		} else if(count>=700 && count<900){
-	  			ref[i] = ref[i] - 0.05;
-	  		} else if(count>=900){
-	  			count = 300;
-	  		}
-	  	 }
 
-
+	  	  for(uint8_t n=0; n<4;n++)
+	  		 ref[n] = old_mensagem[robonum*4+n+1];
 
 
 	  	  count++;
-	  	  sprintf(message, "%f\n \r",velocidade[2]);
+	  	  sprintf(message, "%f\n \r",velocidade[3]);
+
+
 	  	  CDC_Transmit_FS(message,sizeof(message));
 	  	  HAL_Delay(10);
     /* USER CODE END WHILE */

@@ -62,8 +62,6 @@ struct shared_data
 volatile struct shared_data * const xfr_ptr = (struct shared_data *)0x38001000;
 
 uint8_t TxAdress[] = {1,2,3,4,5};
-uint8_t TxData[]="Pao De Batata";
-uint8_t RxAdress[] = {0xEE,0xDD,0xCC,0xBB,0xAA};
 uint8_t RxData[32];
 uint8_t ReadMemManco = 0;
 
@@ -164,8 +162,6 @@ int main(void)
   /* USER CODE BEGIN 2 */
 
   Rx_mode(TxAdress);
-  int count = 0;
-  int num = 1000;
   NRF_Status ret = NRF_OK;
 
 
@@ -178,13 +174,7 @@ int main(void)
 	 ret = ReceiveData(RxData);
 	 if(ret == NRF_OK){
 		 HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_0);
-		 count = count+1;
-	 } else {
-		 //HAL_GPIO_TogglePin(GPIOB,GPIO_PIN_14);
-	 }
 
-	 if(count >= num - (num*0.01)){
-		 HAL_GPIO_WritePin(GPIOE, GPIO_PIN_1, 1);
 	 }
 	 if(xfr_ptr->sts_4to7 == 0){
 		 for(int n = 0; n < 32; n++){
@@ -192,16 +182,16 @@ int main(void)
 		 	}
 		 xfr_ptr->sts_4to7 =1;
 	 }
-
+	 HAL_Delay(10);
 
 
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-  }
-  /* USER CODE END 3 */
-}
 
+  /* USER CODE END 3 */
+  }
+}
 /**
   * @brief Peripherals Common Clock Configuration
   * @retval None
