@@ -25,6 +25,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "nrf24l01.h"
+//aaaa
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
