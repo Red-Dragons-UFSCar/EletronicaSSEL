@@ -55,13 +55,13 @@ struct shared_data
 {
 	uint8_t sts_4to7; // status: 0 = empty, 1 = has data, 2 = locked (CM4-CM7)
 	uint8_t sts_7to4; // status: 0 = empty, 1 = has data, 2 = locked (CM7-CM4)
-	uint8_t M4toM7[32]; // 256 bytes from CM4 to CM7
-	uint8_t M7toM4[32]; // 256 bytes from CM7 to CM4
+	int M4toM7[6]; // 256 bytes from CM4 to CM7
+	int M7toM4[6]; // 256 bytes from CM7 to CM4
 };
 
 // pointer to shared_data struct (inter-core buffers and status)
 volatile struct shared_data * const xfr_ptr = (struct shared_data *)0x38001000;
-uint8_t RxData[32];
+int RxData[6];
 uint8_t Ack_data = 1;
 /* USER CODE END PV */
 
@@ -97,12 +97,12 @@ void Rx_mode(uint8_t Adress[5]){
 	NRF_EnterMode(NRF_MODE_RX);
 }
 
-NRF_Status ReceiveData (uint8_t *data){
+NRF_Status ReceiveData (int *data){
 	NRF_Status ret = NRF_ERROR;
 	uint8_t status = NRF_ReadStatus();
 	uint8_t STATUS_REGISTER_RX_DR_BIT = 6;
 	if(status & (1<<STATUS_REGISTER_RX_DR_BIT)){
-		NRF_ReadPayload(data, 32);
+		NRF_ReadPayload(data, sizeof(data));
 		NRF_WriteAckPayload(0, Ack_data, 1);
 		ret = NRF_OK;
 		NRF_SetRegisterBit(NRF_REG_STATUS, 6);
@@ -206,7 +206,7 @@ int main(void)
 
   /* USER CODE END 3 */
 }
-
+}
 /**
   * @brief Peripherals Common Clock Configuration
   * @retval None

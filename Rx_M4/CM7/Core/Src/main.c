@@ -54,8 +54,8 @@
 COM_InitTypeDef BspCOMInit;
 
 /* USER CODE BEGIN PV */
-uint8_t new_mensagem[32]= {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-uint8_t old_mensagem[32]={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+int new_mensagem[6]= {0,0,0,0,0,0};
+int old_mensagem[6]={0,0,0,0,0,0};
 uint32_t contador =0;
 float velocidade[4]={0,0,0,0};
 float ref[4] = {0,0,0,0};
@@ -66,8 +66,8 @@ struct shared_data
 {
 	uint8_t sts_4to7; // status: 0 = empty, 1 = has data, 2 = locked (CM4-CM7)
 	uint8_t sts_7to4; // status: 0 = empty, 1 = has data, 2 = locked (CM7-CM4)
-	uint8_t M4toM7[32]; // 32 bytes from CM4 to CM7
-	uint8_t M7toM4[32]; // 32 bytes from CM7 to CM4
+	int M4toM7[6]; // 32 bytes from CM4 to CM7
+	int M7toM4[6]; // 32 bytes from CM7 to CM4
 };
 
 // pointer to shared_data struct (inter-core buffers and status)
@@ -91,11 +91,11 @@ void put_M7(uint8_t buffer[32]); // put data from M7 to M4
 /* USER CODE BEGIN 0 */
 uint8_t * get_M4() // get data from M4 to M7 buffer
 {
-	static uint8_t buffer[32]; // buffer to receive data
+	static int buffer[6]; // buffer to receive data
 	if (xfr_ptr->sts_4to7 == 1) // if M4 to M7 buffer has data
 	{
 		xfr_ptr->sts_4to7 = 2; // lock the M4 to M7 buffer
-		for(int n = 0; n < 32; n++)
+		for(int n = 0; n < 6; n++)
 		{
 			buffer[n] = xfr_ptr->M4toM7[n]; // transfer data
 			xfr_ptr->M4toM7[n] = 0; // clear M4 to M7 buffer
@@ -249,7 +249,7 @@ Error_Handler();
 	  	  }
 
 	  	  for(uint8_t n=0; n<4;n++)
-	  		 ref[n] = old_mensagem[robonum*4+n+1];
+	  		 ref[n] = old_mensagem[n+1];
 
 
 	  	  //print para o putty
