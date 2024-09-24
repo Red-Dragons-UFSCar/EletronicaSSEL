@@ -60,13 +60,8 @@ struct shared_data
 
 // pointer to shared_data struct (inter-core buffers and status)
 volatile struct shared_data * const xfr_ptr = (struct shared_data *)0x38001000;
-
-uint8_t TxAdress[] = {1,2,3,4,5};
 uint8_t RxData[32];
-uint8_t ReadMemManco = 0;
-
-
-
+uint8_t Ack_data = 1;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -107,6 +102,7 @@ NRF_Status ReceiveData (uint8_t *data){
 	uint8_t STATUS_REGISTER_RX_DR_BIT = 6;
 	if(status & (1<<STATUS_REGISTER_RX_DR_BIT)){
 		NRF_ReadPayload(data, 32);
+		NRF_WriteAckPayload(0, Ack_data, 1);
 		ret = NRF_OK;
 		NRF_SetRegisterBit(NRF_REG_STATUS, 6);
 	} else {
@@ -161,14 +157,31 @@ int main(void)
   MX_SPI1_Init();
   /* USER CODE BEGIN 2 */
 
-  Rx_mode(TxAdress);
-  NRF_Status ret = NRF_OK;
+
 
 
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+  GPIO_PinState PinState[2];
+
+  //definicao do robo por meio da entrada de tensao no pinc10 e Pinc11//
+  PinState[0]= HAL_GPIO_ReadPin(GPIOC,GPIO_PIN_10);
+  PinState[1]= HAL_GPIO_ReadPin(GPIOC,GPIO_PIN_11);
+  uint8_t TxAdress0[] = {1,2,3,4,5};
+  uint8_t TxAdress1[] = {2,21,15,5,6};
+  uint8_t TxAdress2[] = {5,1,8,2,7};
+  if((PinState[0]==0)&&(PinState[1]==0)){
+	  Rx_mode(TxAdress0);
+  }
+  if(PinState[0]==1){
+  	  Rx_mode(TxAdress1);
+  }
+  if(PinState[1]==1){
+  	  Rx_mode(TxAdress2);
+  }
+  NRF_Status ret = NRF_OK;
   while (1)
   {
 	 //comunicacao com o outro core
@@ -191,8 +204,8 @@ int main(void)
     /* USER CODE BEGIN 3 */
 
   /* USER CODE END 3 */
-  }
 }
+
 /**
   * @brief Peripherals Common Clock Configuration
   * @retval None

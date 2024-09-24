@@ -224,19 +224,6 @@ Error_Handler();
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   char message[100]={'\0'};
-  uint8_t robonum;
-  GPIO_PinState PinState[2];
-
-  //definicao do robo por meio da entrada de tensao no pinc10 e Pinc11//
-  PinState[0]= HAL_GPIO_ReadPin(GPIOC,GPIO_PIN_10);
-  PinState[1]= HAL_GPIO_ReadPin(GPIOC,GPIO_PIN_11);
-  if((PinState[0]==0)&&(PinState[1]==0))
-	  robonum=0;
-  if(PinState[0]==1)
-	  robonum=1;
-  if(PinState[1]==1)
-	  robonum=2;
-
   //Inicializa referencia como zero
   for(uint8_t i =0;i<4;i++){
 	  ref[i] =0;
