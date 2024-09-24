@@ -28,7 +28,7 @@
 /* USER CODE BEGIN Includes */
 #include "dshot.h"
 #include "string.h"
-//aa lula
+//aa lula meu presidente
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
