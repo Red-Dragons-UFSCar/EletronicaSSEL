@@ -226,6 +226,7 @@ Error_Handler();
   char message[100]={'\0'};
   uint8_t robonum;
   GPIO_PinState PinState[2];
+
   //definicao do robo por meio da entrada de tensao no pinc10 e Pinc11//
   PinState[0]= HAL_GPIO_ReadPin(GPIOC,GPIO_PIN_10);
   PinState[1]= HAL_GPIO_ReadPin(GPIOC,GPIO_PIN_11);
@@ -236,21 +237,24 @@ Error_Handler();
   if(PinState[1]==1)
 	  robonum=2;
 
+  //Inicializa referencia como zero
   for(uint8_t i =0;i<4;i++){
 	  ref[i] =0;
   }
   HAL_Delay(7000);
   while (1)
   {
-	  // if  M4 to M7 buffer has data
+	      //comunicacao entre cores
 	  	  if (xfr_ptr->sts_4to7 == 1)
 	  	  {
 	  		  xfr_data = get_M4(); // get data sent from M4 to M7
 	  	  }
 
 	  	  for(uint8_t n = 0; n<32;n++){
-	  		  new_mensagem[n] = xfr_data[n];
+	  		  new_mensagem[n] = xfr_data[n]; //guarda numa variavel local a data recebida do outro core
 	  	  }
+
+	  	  //validacao da mensagem, utilizamos 111 como um ID de inicio e 112 de final
 
 	  	  if((new_mensagem[0]==111)&&(new_mensagem[31]==112)){
 	  		for(uint8_t n=0;n<32;n++)
@@ -261,11 +265,11 @@ Error_Handler();
 	  		 ref[n] = old_mensagem[robonum*4+n+1];
 
 
-	  	  count++;
+	  	  //print para o putty
 	  	  sprintf(message, "%f\n \r",velocidade[3]);
-
-
 	  	  CDC_Transmit_FS(message,sizeof(message));
+
+	  	  //delay
 	  	  HAL_Delay(10);
     /* USER CODE END WHILE */
 

@@ -408,11 +408,11 @@ void TIM15_IRQHandler(void)
 	  speed[i] = vel[i]/(81.92);
 	  velocidade[i] = speed[i];
   }
-  dshot_write(D);
-
 
   //velocidade = speed[0];
   Controle();
+
+  dshot_write(D);
 
   HAL_GPIO_TogglePin(GPIOB,GPIO_PIN_14);
   /* USER CODE END TIM15_IRQn 1 */

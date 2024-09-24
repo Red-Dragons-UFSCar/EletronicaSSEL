@@ -171,6 +171,7 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+	 //comunicacao com o outro core
 	 ret = ReceiveData(RxData);
 	 if(ret == NRF_OK){
 		 HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_0);
