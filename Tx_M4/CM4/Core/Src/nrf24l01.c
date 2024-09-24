@@ -327,10 +327,10 @@ void NRF_Reset() {
 
   // Flush register -> LER DATASHEET!!!!!!!!!!!!!!
   NRF_WriteRegisterByte(NRF_REG_CONFIG,       0x0A);// 00001010
-  NRF_WriteRegisterByte(NRF_REG_EN_AA,        0x00);// 00000000 = AutoAcknologment desligado em todos os Pipes
+  NRF_WriteRegisterByte(NRF_REG_EN_AA,        0x01);// 00000001 = AutoAcknologment ativado no primeiro PIPE
   NRF_WriteRegisterByte(NRF_REG_EN_RXADDR,    0x03);//00000011 -> Pipes 0 e 1 no Rx
   NRF_WriteRegisterByte(NRF_REG_SETUP_AW,     0x03);//00000011 -> 5 bytes no adresss
-  NRF_WriteRegisterByte(NRF_REG_SETUP_RETR,   0x03);//00000000 -> re-transmit desabilitado
+  NRF_WriteRegisterByte(NRF_REG_SETUP_RETR,   0x0F);//00001111 -> re-transmit habilitado. bits 7-4 -> delay de retransmit (250us). bits 3-0 qtd de retransmit (15).
   NRF_WriteRegisterByte(NRF_REG_RF_CH,        0x02);//00000010 -> Canal 3
   NRF_WriteRegisterByte(NRF_REG_RF_SETUP,     0x0e);//00001110 -> LNA desligado, 0dBm, 2MBs
   NRF_WriteRegisterByte(NRF_REG_STATUS,       0x70); // clear flags
@@ -407,21 +407,20 @@ NRF_Status NRF_TransmitAndWait(uint8_t *payload, uint8_t length) {
 
   // Wait for status update
   uint8_t status;
-  int contador = 0;
   for (;;) {
     status = NRF_ReadStatus();
     if (status & (1<<STATUS_BIT_TX_DS)) {
       // Packet transmitted
       ret = NRF_SetRegisterBit(NRF_REG_STATUS, STATUS_BIT_TX_DS); // clear flag
       break;
-    }else if (contador == 20){
-    	ret = NRF_ERROR;
-    	break;
+    } else if (status & (1<<STATUS_BIT_MAX_RT)) {
+      // Max retransmits reached
+      NRF_SetRegisterBit(NRF_REG_STATUS, STATUS_BIT_MAX_RT); // clear flag
+      ret = NRF_MAX_RT;
+      break;
     }
-    contador++;
   }
   ce_reset();
 
   return ret;
 }
-

@@ -48,9 +48,13 @@
 SPI_HandleTypeDef hspi1;
 
 /* USER CODE BEGIN PV */
-uint8_t TxAdress[] = {1,2,3,4,5};
-uint8_t TxData[32]={111,60,70,80,90,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,112};
-uint8_t RxData[32];
+
+uint8_t TxAdress0[] = {1,2,3,4,5};
+uint8_t TxAdress1[] = {2,21,15,5,6};
+uint8_t TxAdress2[] = {5,1,8,2,7};
+
+int8_t TxData[32]={111,60,70,80,90,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,112};
+int8_t RxData[32];
 uint8_t ReadMemManco = 0;
 /* USER CODE END PV */
 
@@ -72,6 +76,16 @@ void Tx_mode(uint8_t Adress[5]){
 	NRF_Reset();
 	NRF_WriteRegister(NRF_REG_TX_ADDR,Adress,5);
 	//Para enviar a mensagem usar função transmitandwait
+}
+
+void changeAdress(uint8_t n){
+
+	if(n==0)
+		NRF_WriteRegister(NRF_REG_TX_ADDR,TxAdress0,5);
+	if(n==1)
+		NRF_WriteRegister(NRF_REG_TX_ADDR,TxAdress1,5);
+	if(n==2)
+		NRF_WriteRegister(NRF_REG_TX_ADDR,TxAdress2,5);
 }
 
 void Rx_mode(uint8_t Adress[5]){
@@ -101,6 +115,9 @@ NRF_Status ReceiveData (uint8_t *data){
 	}
 	return ret;
 }
+
+
+
 /* USER CODE END 0 */
 
 /**
@@ -146,7 +163,7 @@ int main(void)
   MX_GPIO_Init();
   MX_SPI1_Init();
   /* USER CODE BEGIN 2 */
-  Tx_mode(TxAdress);
+  Tx_mode(TxAdress0);
 
   NRF_Status ret = NRF_OK;
   /* USER CODE END 2 */
@@ -156,16 +173,20 @@ int main(void)
   while (1)
   {
 
-	 ret = NRF_TransmitAndWait(TxData, 32);
-	 if(ret == NRF_OK){
-		 HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_14);
-	 } else {
-		 HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_0);
+	 for(uint8_t i=0; i<3;i++){
+		 changeAdress(i);
+		 ret = NRF_TransmitAndWait(TxData, 32);
+		 if(ret == NRF_OK){
+			 HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_14);
+		 } else {
+			 HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_0);
+		 }
 	 }
 	  HAL_Delay(100);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+
   }
   /* USER CODE END 3 */
 }
