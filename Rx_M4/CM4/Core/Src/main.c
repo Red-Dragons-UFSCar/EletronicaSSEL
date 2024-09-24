@@ -25,7 +25,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "nrf24l01.h"
-//aaa lula
+//aaa lula meu presidente
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
