@@ -25,7 +25,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "nrf24l01.h"
-//pfv git
+//aaa lula
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
