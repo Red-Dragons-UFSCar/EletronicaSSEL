@@ -54,7 +54,7 @@ uint8_t TxAdress1[] = {2,21,15,5,6};
 uint8_t TxAdress2[] = {5,1,8,2,7};
 
 int8_t TxData[32]={111,60,70,80,90,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,112};
-int8_t RxData[32];
+int8_t RxData[1];
 uint8_t ReadMemManco = 0;
 /* USER CODE END PV */
 
@@ -78,7 +78,7 @@ void Tx_mode(uint8_t Adress[5]){
 	//Para enviar a mensagem usar função transmitandwait
 }
 
-void changeAdress(uint8_t n){
+void changeAddress(uint8_t n){
 
 	if(n==0)
 		NRF_WriteRegister(NRF_REG_TX_ADDR,TxAdress0,5);
@@ -174,10 +174,17 @@ int main(void)
   {
 
 	 for(uint8_t i=0; i<3;i++){
-		 changeAdress(i);
+		 changeAddress(i);
 		 ret = NRF_TransmitAndWait(TxData, 32);
 		 if(ret == NRF_OK){
+			 //Pino de confirmação
 			 HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_14);
+
+			 //Lê o ACK payload e printa no serial
+			 NRF_ReadPayload(RxData,1);
+		  	 sprintf(message, "%f\n \r",RxData);
+		  	 CDC_Transmit_FS(message,sizeof(message));
+
 		 } else {
 			 HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_0);
 		 }
