@@ -330,7 +330,7 @@ void NRF_Reset() {
   NRF_WriteRegisterByte(NRF_REG_EN_AA,        0x01);// 00000000 = AutoAcknologment desligado em todos os Pipes
   NRF_WriteRegisterByte(NRF_REG_EN_RXADDR,    0x03);//00000011 -> Pipes 0 e 1 no Rx
   NRF_WriteRegisterByte(NRF_REG_SETUP_AW,     0x03);//00000011 -> 5 bytes no adresss
-  NRF_WriteRegisterByte(NRF_REG_SETUP_RETR,   0x0F);//00000000 -> re-transmit habilitado. bits 7->4 delay de re-transmit(250us).
+  NRF_WriteRegisterByte(NRF_REG_SETUP_RETR,   0x0F);//00000000 -> re-transmit habilitado. bits 7->4 delay de re-transmit(250uss).
   NRF_WriteRegisterByte(NRF_REG_RF_CH,        0x02);//00000010 -> Canal 3
   NRF_WriteRegisterByte(NRF_REG_RF_SETUP,     0x0e);//00001110 -> LNA desligado, 0dBm, 2MBs
   NRF_WriteRegisterByte(NRF_REG_STATUS,       0x70); // clear flags
