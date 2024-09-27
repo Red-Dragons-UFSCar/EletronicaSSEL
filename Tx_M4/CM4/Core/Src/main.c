@@ -182,9 +182,6 @@ int main(void)
 
 			 //Lê o ACK payload e printa no serial
 			 NRF_ReadPayload(RxData,1);
-		  	 sprintf(message, "%f\n \r",RxData);
-		  	 CDC_Transmit_FS(message,sizeof(message));
-
 		 } else {
 			 HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_0);
 		 }

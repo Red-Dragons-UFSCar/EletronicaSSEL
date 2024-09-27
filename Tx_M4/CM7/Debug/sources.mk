@@ -27,4 +27,7 @@ Core/Src \
 Core/Startup \
 Drivers/BSP/STM32H7xx_Nucleo \
 Drivers/STM32H7xx_HAL_Driver \
+Middlewares/ST/STM32_USB_Device_Library \
+USB_DEVICE/App \
+USB_DEVICE/Target \
 

@@ -32,6 +32,9 @@ Drivers/BSP/STM32H7xx_Nucleo/stm32h7xx_nucleo.o: \
  ../../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_pwr_ex.h \
  ../../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_uart.h \
  ../../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_uart_ex.h \
+ ../../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_pcd.h \
+ ../../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_ll_usb.h \
+ ../../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_pcd_ex.h \
  E:/Stm/EletronicaSSEL/Tx_M4/Drivers/BSP/STM32H7xx_Nucleo/stm32h7xx_nucleo_errno.h
 E:/Stm/EletronicaSSEL/Tx_M4/Drivers/BSP/STM32H7xx_Nucleo/stm32h7xx_nucleo.h:
 ../Core/Inc/stm32h7xx_nucleo_conf.h:
@@ -65,4 +68,7 @@ E:/Stm/EletronicaSSEL/Tx_M4/Drivers/BSP/STM32H7xx_Nucleo/stm32h7xx_nucleo.h:
 ../../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_pwr_ex.h:
 ../../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_uart.h:
 ../../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_uart_ex.h:
+../../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_pcd.h:
+../../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_ll_usb.h:
+../../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_pcd_ex.h:
 E:/Stm/EletronicaSSEL/Tx_M4/Drivers/BSP/STM32H7xx_Nucleo/stm32h7xx_nucleo_errno.h:
