@@ -149,12 +149,12 @@ Error_Handler();
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   char message[100] = {'\0'};
-  uint8_t Retorno[9] = {20,20,20,0,0,0,0,0,0};//Correntes (3 robos), Latência (3 Robos), Perda de Pacote (3 Robos)
-  uint8_t Software[24] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}; //((Dir,vel)*4Rodas)*3Robos
+  int Retorno[9] = {20,20,20,0,0,0,0,0,0};//Correntes (3 robos), Latência (3 Robos), Perda de Pacote (3 Robos)
+  int Software[12] = {0,0,0,0,0,0,0,0,0,0,0,0}; //((Dir,vel)*4Rodas)*3Robos
   while (1)
   {
 	CDC_Receive_FS(Software,sizeof(Software));
-	Retorno[0] = Software[0];
+	Retorno[0] = Software[1];
 	sprintf(message, "%d\n",Retorno[0]);
 	CDC_Transmit_FS(message,sizeof(message));
 	//CDC_Transmit_FS(message,sizeof(message));
