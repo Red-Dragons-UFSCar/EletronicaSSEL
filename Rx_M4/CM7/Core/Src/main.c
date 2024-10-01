@@ -245,7 +245,7 @@ Error_Handler();
 	  	  //validacao da mensagem, utilizamos 111 como um ID de inicio e 112 de final
 
 	  	  if((new_mensagem[0]==111)&&(new_mensagem[31]==112)){
-	  		for(uint8_t n=0;n<32;n++)
+	  		for(uint8_t n=0;n<6;n++)
 	  		  old_mensagem[n] = new_mensagem[n];
 	  	  }
 

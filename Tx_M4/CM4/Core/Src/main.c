@@ -198,7 +198,7 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   int *xfr_dataM4;
   int Valores[12];
-  uint8_t Returns[9];
+  int Returns[9];
   uint32_t acumulador[3];
   while (1)
   {
@@ -223,14 +223,18 @@ int main(void)
 			 HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_14);
 
 			 //Lê o ACK payload e printa no serial
-			 NRF_ReadPayload(xfr_ptr->M4toM7[i],4);
-			 xfr_ptr->M4toM7[i+3] = acumulador[i];
+			 NRF_ReadPayload(Returns[i],4);
+			 Returns[i+3] = acumulador[i];
 			 acumulador[i] = 0;
 		 } else {
 			 HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_0);
 
 	 }
 	 if(xfr_ptr->sts_4to7 == 0){
+		 for(uint8_t n = 0 ;n<9;n++){
+			 xfr_ptr->M4toM7[n] = Returns[i];
+		 }
+
 	 	 xfr_ptr->sts_4to7 = 1;
 	 }
 	  HAL_Delay(100);
