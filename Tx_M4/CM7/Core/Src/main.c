@@ -190,7 +190,9 @@ Error_Handler();
 	Retorno[0] = Software[1];
 	sprintf(message, "%d\n",Retorno[0]);
 	CDC_Transmit_FS(message,sizeof(message));
-
+	if(xfr_ptr->sts_7to4 == 0){
+		 xfr_ptr->sts_7to4 = 1;
+	 }
 
 
 	HAL_Delay(5);

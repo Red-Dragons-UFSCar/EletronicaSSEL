@@ -198,10 +198,11 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   int *xfr_dataM4;
   int Valores[12];
-  uint8_t AckPld[3];
+  uint8_t Returns[9];
+  uint32_t acumulador[3];
   while (1)
   {
-	 if(xfr_ptr->sts_4to7 == 1){
+	 if(xfr_ptr->sts_7to4 == 1){
 		xfr_dataM4 = get_M7();
 	  }
 	  for(uint8_t i=0; i<12;i++){
@@ -212,17 +213,25 @@ int main(void)
 		 for(uin8_t n=0; n<4;n++){
 			 TxData[n+1] = Valores[n+i*4];
 		 }
+		 uint32_t Start = HAL_GetTick();
 		 ret = NRF_TransmitAndWait(TxData, sizeof(TxData));
+		 uint32_t End = HAL_GetTick();
+		 acumulador[i]+= End - Start;
 		 if(ret == NRF_OK){
+
 			 //Pino de confirmação
 			 HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_14);
 
 			 //Lê o ACK payload e printa no serial
-			 NRF_ReadPayload(AckPld[i],1);
-
+			 NRF_ReadPayload(xfr_ptr->M4toM7[i],4);
+			 xfr_ptr->M4toM7[i+3] = acumulador[i];
+			 acumulador[i] = 0;
 		 } else {
 			 HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_0);
-		 }
+
+	 }
+	 if(xfr_ptr->sts_4to7 == 0){
+	 	 xfr_ptr->sts_4to7 = 1;
 	 }
 	  HAL_Delay(100);
     /* USER CODE END WHILE */
