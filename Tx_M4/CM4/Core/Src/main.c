@@ -48,13 +48,39 @@
 SPI_HandleTypeDef hspi1;
 
 /* USER CODE BEGIN PV */
+struct shared_data
+{
+	uint8_t sts_4to7; // status: 0 = empty, 1 = has data, 2 = locked (CM4-CM7)
+	uint8_t sts_7to4; // status: 0 = empty, 1 = has data, 2 = locked (CM7-CM4)
+	int M4toM7[9]; // 256 bytes from CM4 to CM7
+	int M7toM4[12]; // 256 bytes from CM7 to CM4
+};
+
+// pointer to shared_data struct (inter-core buffers and status)
+volatile struct shared_data * const xfr_ptr = (struct shared_data *)0x38001000;
+
+uint8_t * get_M7() // get data from M4 to M7 buffer
+{
+	static int buffer[12]; // buffer to receive data
+	if (xfr_ptr->sts_7to4 == 1) // if M4 to M7 buffer has data
+	{
+		xfr_ptr->sts_7to4 = 2; // lock the M4 to M7 buffer
+		for(int n = 0; n < 12; n++)
+		{
+			buffer[n] = xfr_ptr->M4toM7[n]; // transfer data
+			xfr_ptr->M7toM4[n] = 0; // clear M4 to M7 buffer
+		}
+		xfr_ptr->sts_7to4 = 0; // M4 to M7 buffer is empty
+	}
+	return buffer; // return the buffer (pointer)
+}
 
 uint8_t TxAdress0[] = {1,2,3,4,5};
 uint8_t TxAdress1[] = {2,21,15,5,6};
 uint8_t TxAdress2[] = {5,1,8,2,7};
 
-int8_t TxData[32]={111,60,70,80,90,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,112};
-int8_t RxData[1];
+int TxData[6]={111,0,0,0,0,112};
+uint8_t RxData[1];
 uint8_t ReadMemManco = 0;
 /* USER CODE END PV */
 
@@ -170,18 +196,30 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+  int *xfr_dataM4;
+  int Valores[12];
+  uint8_t AckPld[3];
   while (1)
   {
-
+	 if(xfr_ptr->sts_4to7 == 1){
+		xfr_dataM4 = get_M7();
+	  }
+	  for(uint8_t i=0; i<12;i++){
+		Valores[i] = xfr_data[i];
+	  }
 	 for(uint8_t i=0; i<3;i++){
 		 changeAddress(i);
-		 ret = NRF_TransmitAndWait(TxData, 32);
+		 for(uin8_t n=0; n<4;n++){
+			 TxData[n+1] = Valores[n+i*4];
+		 }
+		 ret = NRF_TransmitAndWait(TxData, sizeof(TxData));
 		 if(ret == NRF_OK){
 			 //Pino de confirmação
 			 HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_14);
 
 			 //Lê o ACK payload e printa no serial
-			 NRF_ReadPayload(RxData,1);
+			 NRF_ReadPayload(AckPld[i],1);
+
 		 } else {
 			 HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_0);
 		 }
