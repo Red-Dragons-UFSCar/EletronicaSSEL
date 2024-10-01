@@ -234,7 +234,6 @@ int main(void)
 		 for(uint8_t n = 0 ;n<9;n++){
 			 xfr_ptr->M4toM7[n] = Returns[i];
 		 }
-
 	 	 xfr_ptr->sts_4to7 = 1;
 	 }
 	  HAL_Delay(100);
