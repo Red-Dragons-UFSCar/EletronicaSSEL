@@ -90,7 +90,7 @@ void put_M7(uint8_t buffer[32]); // put data from M7 to M4
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-uint8_t * get_M4() // get data from M4 to M7 buffer
+int * get_M4() // get data from M4 to M7 buffer
 {
 	static int buffer[6]; // buffer to receive data
 	if (xfr_ptr->sts_4to7 == 1) // if M4 to M7 buffer has data
@@ -182,7 +182,7 @@ Error_Handler();
   MX_TIM15_Init();
   MX_ADC1_Init();
   /* USER CODE BEGIN 2 */
-  int count = 0;
+
   HAL_TIM_Encoder_Start_IT(&htim4, TIM_CHANNEL_ALL);
   HAL_TIM_Encoder_Start_IT(&htim1, TIM_CHANNEL_ALL);
   HAL_TIM_Encoder_Start_IT(&htim8, TIM_CHANNEL_ALL);

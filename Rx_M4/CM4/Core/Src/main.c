@@ -97,12 +97,12 @@ void Rx_mode(uint8_t Adress[5]){
 	NRF_EnterMode(NRF_MODE_RX);
 }
 
-NRF_Status ReceiveData (int *data){
+NRF_Status ReceiveData (uint8_t *data, uint32_t len){
 	NRF_Status ret = NRF_ERROR;
 	uint8_t status = NRF_ReadStatus();
 	uint8_t STATUS_REGISTER_RX_DR_BIT = 6;
 	if(status & (1<<STATUS_REGISTER_RX_DR_BIT)){
-		NRF_ReadPayload(data, sizeof(data));
+		NRF_ReadPayload(data,len);
 		NRF_WriteAckPayload(0, Ack_data, 1);
 		ret = NRF_OK;
 		NRF_SetRegisterBit(NRF_REG_STATUS, 6);
@@ -186,13 +186,13 @@ int main(void)
   while (1)
   {
 	 //comunicacao com o outro core
-	 ret = ReceiveData(RxData);
+	 ret = ReceiveData(RxData, sizeof(RxData));
 	 if(ret == NRF_OK){
 		 HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_0);
 
 	 }
 	 if(xfr_ptr->sts_4to7 == 0){
-		 for(int n = 0; n < 32; n++){
+		 for(int n = 0; n < 6; n++){
 		 	xfr_ptr->M4toM7[n] = RxData[n];
 		 	}
 		 xfr_ptr->sts_4to7 =1;

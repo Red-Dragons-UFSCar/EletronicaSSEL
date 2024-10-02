@@ -61,7 +61,7 @@ struct shared_data
 // pointer to shared_data struct (inter-core buffers and status)
 volatile struct shared_data * const xfr_ptr = (struct shared_data *)0x38001000;
 
-uint8_t * get_M4() // get data from M4 to M7 buffer
+int * get_M4() // get data from M4 to M7 buffer
 {
 	static int buffer[9]; // buffer to receive data
 	if (xfr_ptr->sts_4to7 == 1) // if M4 to M7 buffer has data
@@ -174,6 +174,8 @@ Error_Handler();
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+  xfr_ptr->sts_4to7 = 0;
+  xfr_ptr->sts_7to4 = 0;
   int *xfr_data;
   char message[100] = {'\0'};
   int Retorno[9] = {20,20,20,0,0,0,0,0,0};//Correntes (3 robos), Latência (3 Robos), Perda de Pacote (3 Robos)

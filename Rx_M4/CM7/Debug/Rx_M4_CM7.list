@@ -2081,7 +2081,7 @@ Error_Handler();
  80010c2:	6fdb      	ldr	r3, [r3, #124]	@ 0x7c
  80010c4:	2b70      	cmp	r3, #112	@ 0x70
  80010c6:	d116      	bne.n	80010f6 <main+0x20e>
-	  		for(uint8_t n=0;n<32;n++)
+	  		for(uint8_t n=0;n<6;n++)
  80010c8:	2300      	movs	r3, #0
  80010ca:	f887 306d 	strb.w	r3, [r7, #109]	@ 0x6d
  80010ce:	e00e      	b.n	80010ee <main+0x206>
@@ -2092,12 +2092,12 @@ Error_Handler();
  80010da:	f851 2022 	ldr.w	r2, [r1, r2, lsl #2]
  80010de:	4929      	ldr	r1, [pc, #164]	@ (8001184 <main+0x29c>)
  80010e0:	f841 2023 	str.w	r2, [r1, r3, lsl #2]
-	  		for(uint8_t n=0;n<32;n++)
+	  		for(uint8_t n=0;n<6;n++)
  80010e4:	f897 306d 	ldrb.w	r3, [r7, #109]	@ 0x6d
  80010e8:	3301      	adds	r3, #1
  80010ea:	f887 306d 	strb.w	r3, [r7, #109]	@ 0x6d
  80010ee:	f897 306d 	ldrb.w	r3, [r7, #109]	@ 0x6d
- 80010f2:	2b1f      	cmp	r3, #31
+ 80010f2:	2b05      	cmp	r3, #5
  80010f4:	d9ec      	bls.n	80010d0 <main+0x1e8>
 	  	  }
 

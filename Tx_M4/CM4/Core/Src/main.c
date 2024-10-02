@@ -59,7 +59,7 @@ struct shared_data
 // pointer to shared_data struct (inter-core buffers and status)
 volatile struct shared_data * const xfr_ptr = (struct shared_data *)0x38001000;
 
-uint8_t * get_M7() // get data from M4 to M7 buffer
+int * get_M7() // get data from M4 to M7 buffer
 {
 	static int buffer[12]; // buffer to receive data
 	if (xfr_ptr->sts_7to4 == 1) // if M4 to M7 buffer has data
@@ -196,6 +196,8 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+  xfr_ptr->sts_4to7 = 0;
+  xfr_ptr->sts_7to4 = 0;
   int *xfr_dataM4;
   int Valores[12];
   int Returns[9];
@@ -206,11 +208,11 @@ int main(void)
 		xfr_dataM4 = get_M7();
 	  }
 	  for(uint8_t i=0; i<12;i++){
-		Valores[i] = xfr_data[i];
+		Valores[i] = xfr_dataM4[i];
 	  }
 	 for(uint8_t i=0; i<3;i++){
 		 changeAddress(i);
-		 for(uin8_t n=0; n<4;n++){
+		 for(uint8_t n=0; n<4;n++){
 			 TxData[n+1] = Valores[n+i*4];
 		 }
 		 uint32_t Start = HAL_GetTick();
@@ -221,7 +223,6 @@ int main(void)
 
 			 //Pino de confirmação
 			 HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_14);
-
 			 //Lê o ACK payload e printa no serial
 			 NRF_ReadPayload(Returns[i],4);
 			 Returns[i+3] = acumulador[i];
@@ -244,7 +245,7 @@ int main(void)
   }
   /* USER CODE END 3 */
 }
-
+}
 /**
   * @brief SPI1 Initialization Function
   * @param None
