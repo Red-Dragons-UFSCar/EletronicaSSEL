@@ -169,7 +169,7 @@ NRF_Status NRF_ReadRegister(uint8_t reg, uint8_t *read, uint8_t length) {
 uint8_t NRF_ReadPacketLoss(){
 	NRF_Status ret = NRF_OK;
 	uint8_t Dados= 0;
-	ret = NRF_SendReadCommand(NRF_REG_OBSERVE_TX, Dados, 1);
+	ret = NRF_SendReadCommand(NRF_REG_OBSERVE_TX, &Dados, 1);
 	if(ret != NRF_OK){
 		return 0;
 	} else{
