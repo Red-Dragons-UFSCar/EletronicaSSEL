@@ -423,4 +423,6 @@ typedef enum
   void NRF_PrintConfig();
 //!@}
 
+  uint8_t NRF_ReadPacketLoss();
+
 #endif /* NRF24L01_H */

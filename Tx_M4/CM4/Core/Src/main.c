@@ -219,13 +219,15 @@ int main(void)
 		 ret = NRF_TransmitAndWait(TxData, sizeof(TxData));
 		 uint32_t End = HAL_GetTick();
 		 acumulador[i]+= End - Start;
+		 uint8_t ploss = NRF_ReadPacketLoss();
 		 if(ret == NRF_OK){
 
 			 //Pino de confirmação
 			 HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_14);
 			 //Lê o ACK payload e printa no serial
-			 NRF_ReadPayload(Returns[i],4);
+			 NRF_ReadPayload(Returns[i],4); //Verificar este linhas !!!!!!!!!!!!!!!!!!!!
 			 Returns[i+3] = acumulador[i];
+			 Returns[i+6] = ploss;
 			 acumulador[i] = 0;
 		 } else {
 			 HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_0);
