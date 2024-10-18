@@ -103,7 +103,7 @@ NRF_Status ReceiveData (uint8_t *data, uint32_t len){
 	uint8_t STATUS_REGISTER_RX_DR_BIT = 6;
 	if(status & (1<<STATUS_REGISTER_RX_DR_BIT)){
 		NRF_ReadPayload(data,len);
-		NRF_WriteAckPayload(0, Ack_data, 1);
+		NRF_WriteAckPayload(0 , Ack_data, 1);
 		ret = NRF_OK;
 		NRF_SetRegisterBit(NRF_REG_STATUS, 6);
 	} else {

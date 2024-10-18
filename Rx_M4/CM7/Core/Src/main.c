@@ -83,7 +83,7 @@ uint16_t motores[4] = {0,0,0,0};
 void SystemClock_Config(void);
 void PeriphCommonClock_Config(void);
 /* USER CODE BEGIN PFP */
-uint8_t * get_M4(); // get data from M4 to M7
+
 
 void put_M7(uint8_t buffer[32]); // put data from M7 to M4
 /* USER CODE END PFP */
