@@ -237,9 +237,11 @@ int main(void)
 			 Returns[i+3] = acumulador[i];
 			 Returns[i+6] = ploss;
 			 acumulador[i] = 0;
-		 } else {
-			 HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_0);
+		 } else if(ret = NRF_MAX_RT) {
+			 HAL_GPIO_TogglePin(GPIOE, GPIO_PIN_1);
 
+	 } else {
+		 HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_0);
 	 }
 	 if(xfr_ptr->sts_4to7 == 0){
 		 for(uint8_t n = 0 ;n<9;n++){
@@ -247,7 +249,7 @@ int main(void)
 		 }
 	 	 xfr_ptr->sts_4to7 = 1;
 	 }
-	 HAL_GPIO_TogglePin(GPIOE, GPIO_PIN_1);
+
 	  HAL_Delay(100);
     /* USER CODE END WHILE */
 

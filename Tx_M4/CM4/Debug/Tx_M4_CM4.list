@@ -33,15 +33,15 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, READONLY, DEBUGGING, OCTETS
  14 .debug_macro  000399b1  00000000  00000000  00014def  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 15 .debug_line   0000d714  00000000  00000000  0004e7a0  2**0
+ 15 .debug_line   0000d711  00000000  00000000  0004e7a0  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 16 .debug_str    0017d220  00000000  00000000  0005beb4  2**0
+ 16 .debug_str    0017d220  00000000  00000000  0005beb1  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 17 .comment      00000043  00000000  00000000  001d90d4  2**0
+ 17 .comment      00000043  00000000  00000000  001d90d1  2**0
                   CONTENTS, READONLY
- 18 .debug_frame  00002bb8  00000000  00000000  001d9118  2**2
+ 18 .debug_frame  00002bb8  00000000  00000000  001d9114  2**2
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 19 .debug_line_str 0000004e  00000000  00000000  001dbcd0  2**0
+ 19 .debug_line_str 0000004e  00000000  00000000  001dbccc  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
 
 Disassembly of section .text:
@@ -701,7 +701,7 @@ int main(void)
 	 for(uint8_t i=0; i<3;i++){
  81007f4:	2300      	movs	r3, #0
  81007f6:	f887 307a 	strb.w	r3, [r7, #122]	@ 0x7a
- 81007fa:	e0ad      	b.n	8100958 <main+0x234>
+ 81007fa:	e0ac      	b.n	8100956 <main+0x232>
 		 changeAddress(i);
  81007fc:	f897 307a 	ldrb.w	r3, [r7, #122]	@ 0x7a
  8100800:	4618      	mov	r0, r3
@@ -808,64 +808,66 @@ int main(void)
  81008ea:	443b      	add	r3, r7
  81008ec:	2200      	movs	r2, #0
  81008ee:	f843 2c78 	str.w	r2, [r3, #-120]
- 81008f2:	e003      	b.n	81008fc <main+0x1d8>
-		 } else {
-			 HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_0);
- 81008f4:	2101      	movs	r1, #1
- 81008f6:	4821      	ldr	r0, [pc, #132]	@ (810097c <main+0x258>)
- 81008f8:	f001 f929 	bl	8101b4e <HAL_GPIO_TogglePin>
+ 81008f2:	e006      	b.n	8100902 <main+0x1de>
+		 } else if(ret = NRF_MAX_RT) {
+ 81008f4:	2305      	movs	r3, #5
+ 81008f6:	f887 3077 	strb.w	r3, [r7, #119]	@ 0x77
+			 HAL_GPIO_TogglePin(GPIOE, GPIO_PIN_1);
+ 81008fa:	2102      	movs	r1, #2
+ 81008fc:	4820      	ldr	r0, [pc, #128]	@ (8100980 <main+0x25c>)
+ 81008fe:	f001 f926 	bl	8101b4e <HAL_GPIO_TogglePin>
 
+	 } else {
+		 HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_0);
 	 }
 	 if(xfr_ptr->sts_4to7 == 0){
- 81008fc:	4b1d      	ldr	r3, [pc, #116]	@ (8100974 <main+0x250>)
- 81008fe:	781b      	ldrb	r3, [r3, #0]
- 8100900:	b2db      	uxtb	r3, r3
- 8100902:	2b00      	cmp	r3, #0
- 8100904:	d11c      	bne.n	8100940 <main+0x21c>
+ 8100902:	4b1c      	ldr	r3, [pc, #112]	@ (8100974 <main+0x250>)
+ 8100904:	781b      	ldrb	r3, [r3, #0]
+ 8100906:	b2db      	uxtb	r3, r3
+ 8100908:	2b00      	cmp	r3, #0
+ 810090a:	d11c      	bne.n	8100946 <main+0x222>
 		 for(uint8_t n = 0 ;n<9;n++){
- 8100906:	2300      	movs	r3, #0
- 8100908:	f887 3078 	strb.w	r3, [r7, #120]	@ 0x78
- 810090c:	e011      	b.n	8100932 <main+0x20e>
+ 810090c:	2300      	movs	r3, #0
+ 810090e:	f887 3078 	strb.w	r3, [r7, #120]	@ 0x78
+ 8100912:	e011      	b.n	8100938 <main+0x214>
 			 xfr_ptr->M4toM7[n] = Returns[i];
- 810090e:	f897 307a 	ldrb.w	r3, [r7, #122]	@ 0x7a
- 8100912:	4818      	ldr	r0, [pc, #96]	@ (8100974 <main+0x250>)
- 8100914:	f897 1078 	ldrb.w	r1, [r7, #120]	@ 0x78
- 8100918:	009b      	lsls	r3, r3, #2
- 810091a:	3380      	adds	r3, #128	@ 0x80
- 810091c:	443b      	add	r3, r7
- 810091e:	f853 2c6c 	ldr.w	r2, [r3, #-108]
- 8100922:	008b      	lsls	r3, r1, #2
- 8100924:	4403      	add	r3, r0
- 8100926:	605a      	str	r2, [r3, #4]
+ 8100914:	f897 307a 	ldrb.w	r3, [r7, #122]	@ 0x7a
+ 8100918:	4816      	ldr	r0, [pc, #88]	@ (8100974 <main+0x250>)
+ 810091a:	f897 1078 	ldrb.w	r1, [r7, #120]	@ 0x78
+ 810091e:	009b      	lsls	r3, r3, #2
+ 8100920:	3380      	adds	r3, #128	@ 0x80
+ 8100922:	443b      	add	r3, r7
+ 8100924:	f853 2c6c 	ldr.w	r2, [r3, #-108]
+ 8100928:	008b      	lsls	r3, r1, #2
+ 810092a:	4403      	add	r3, r0
+ 810092c:	605a      	str	r2, [r3, #4]
 		 for(uint8_t n = 0 ;n<9;n++){
- 8100928:	f897 3078 	ldrb.w	r3, [r7, #120]	@ 0x78
- 810092c:	3301      	adds	r3, #1
- 810092e:	f887 3078 	strb.w	r3, [r7, #120]	@ 0x78
- 8100932:	f897 3078 	ldrb.w	r3, [r7, #120]	@ 0x78
- 8100936:	2b08      	cmp	r3, #8
- 8100938:	d9e9      	bls.n	810090e <main+0x1ea>
+ 810092e:	f897 3078 	ldrb.w	r3, [r7, #120]	@ 0x78
+ 8100932:	3301      	adds	r3, #1
+ 8100934:	f887 3078 	strb.w	r3, [r7, #120]	@ 0x78
+ 8100938:	f897 3078 	ldrb.w	r3, [r7, #120]	@ 0x78
+ 810093c:	2b08      	cmp	r3, #8
+ 810093e:	d9e9      	bls.n	8100914 <main+0x1f0>
 		 }
 	 	 xfr_ptr->sts_4to7 = 1;
- 810093a:	4b0e      	ldr	r3, [pc, #56]	@ (8100974 <main+0x250>)
- 810093c:	2201      	movs	r2, #1
- 810093e:	701a      	strb	r2, [r3, #0]
+ 8100940:	4b0c      	ldr	r3, [pc, #48]	@ (8100974 <main+0x250>)
+ 8100942:	2201      	movs	r2, #1
+ 8100944:	701a      	strb	r2, [r3, #0]
 	 }
-	 HAL_GPIO_TogglePin(GPIOE, GPIO_PIN_1);
- 8100940:	2102      	movs	r1, #2
- 8100942:	480f      	ldr	r0, [pc, #60]	@ (8100980 <main+0x25c>)
- 8100944:	f001 f903 	bl	8101b4e <HAL_GPIO_TogglePin>
+
 	  HAL_Delay(100);
- 8100948:	2064      	movs	r0, #100	@ 0x64
- 810094a:	f000 fe1b 	bl	8101584 <HAL_Delay>
+ 8100946:	2064      	movs	r0, #100	@ 0x64
+ 8100948:	f000 fe1c 	bl	8101584 <HAL_Delay>
 	 for(uint8_t i=0; i<3;i++){
- 810094e:	f897 307a 	ldrb.w	r3, [r7, #122]	@ 0x7a
- 8100952:	3301      	adds	r3, #1
- 8100954:	f887 307a 	strb.w	r3, [r7, #122]	@ 0x7a
- 8100958:	f897 307a 	ldrb.w	r3, [r7, #122]	@ 0x7a
- 810095c:	2b02      	cmp	r3, #2
- 810095e:	f67f af4d 	bls.w	81007fc <main+0xd8>
+ 810094c:	f897 307a 	ldrb.w	r3, [r7, #122]	@ 0x7a
+ 8100950:	3301      	adds	r3, #1
+ 8100952:	f887 307a 	strb.w	r3, [r7, #122]	@ 0x7a
+ 8100956:	f897 307a 	ldrb.w	r3, [r7, #122]	@ 0x7a
+ 810095a:	2b02      	cmp	r3, #2
+ 810095c:	f67f af4e 	bls.w	81007fc <main+0xd8>
 	 if(xfr_ptr->sts_7to4 == 1){
- 8100962:	e725      	b.n	81007b0 <main+0x8c>
+ 8100960:	e726      	b.n	81007b0 <main+0x8c>
+ 8100962:	bf00      	nop
  8100964:	58024400 	.word	0x58024400
  8100968:	e000ed00 	.word	0xe000ed00
  810096c:	58026400 	.word	0x58026400
