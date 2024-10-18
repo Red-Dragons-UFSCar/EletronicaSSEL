@@ -327,7 +327,7 @@ void NRF_Reset() {
 
   // Flush register -> LER DATASHEET!!!!!!!!!!!!!!
   NRF_WriteRegisterByte(NRF_REG_CONFIG,       0x0A);// 00001010
-  NRF_WriteRegisterByte(NRF_REG_EN_AA,        0x01);// 00000000 = AutoAcknologment desligado em todos os Pipes
+  NRF_WriteRegisterByte(NRF_REG_EN_AA,        0x3f);// 00000000 = AutoAcknologment ligado em todos os Pipes
   NRF_WriteRegisterByte(NRF_REG_EN_RXADDR,    0x03);//00000011 -> Pipes 0 e 1 no Rx
   NRF_WriteRegisterByte(NRF_REG_SETUP_AW,     0x03);//00000011 -> 5 bytes no adresss
   NRF_WriteRegisterByte(NRF_REG_SETUP_RETR,   0x0F);//00000000 -> re-transmit habilitado. bits 7->4 delay de re-transmit(250uss).

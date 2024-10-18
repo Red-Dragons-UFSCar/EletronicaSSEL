@@ -102,16 +102,24 @@ void Tx_mode(uint8_t Adress[5]){
 	NRF_Reset();
 	NRF_WriteRegister(NRF_REG_TX_ADDR,Adress,5);
 	//Para enviar a mensagem usar função transmitandwait
+	NRF_WriteRegister(NRF_REG_RX_ADDR_P0, Adress, 5);
 }
 
 void changeAddress(uint8_t n){
-
-	if(n==0)
+	NRF_EnterMode(NRF_MODE_STANDBY1);
+	if(n==0){
 		NRF_WriteRegister(NRF_REG_TX_ADDR,TxAdress0,5);
-	if(n==1)
+		NRF_WriteRegister(NRF_REG_RX_ADDR_P0, TxAdress0, 5);
+	}
+	if(n==1){
 		NRF_WriteRegister(NRF_REG_TX_ADDR,TxAdress1,5);
-	if(n==2)
+		NRF_WriteRegister(NRF_REG_RX_ADDR_P0, TxAdress1, 5);
+	}
+	if(n==2){
 		NRF_WriteRegister(NRF_REG_TX_ADDR,TxAdress2,5);
+		NRF_WriteRegister(NRF_REG_RX_ADDR_P0, TxAdress2, 5);
+	}
+	NRF_EnterMode(NRF_MODE_TX);
 }
 
 void Rx_mode(uint8_t Adress[5]){
@@ -225,7 +233,7 @@ int main(void)
 			 //Pino de confirmação
 			 HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_14);
 			 //Lê o ACK payload e printa no serial
-			 NRF_ReadPayload(Returns[i],4); //Verificar este linhas !!!!!!!!!!!!!!!!!!!!
+			 NRF_ReadPayload(&Returns[i],4); //Verificar este linhas !!!!!!!!!!!!!!!!!!!!
 			 Returns[i+3] = acumulador[i];
 			 Returns[i+6] = ploss;
 			 acumulador[i] = 0;
@@ -239,6 +247,7 @@ int main(void)
 		 }
 	 	 xfr_ptr->sts_4to7 = 1;
 	 }
+	 HAL_GPIO_TogglePin(GPIOE, GPIO_PIN_1);
 	  HAL_Delay(100);
     /* USER CODE END WHILE */
 

@@ -90,6 +90,7 @@ void Rx_mode(uint8_t Adress[5]){
 	}
 
 	NRF_Reset();
+
 	NRF_WriteRegister(NRF_REG_RX_ADDR_P0,Adress,5);
 
 	NRF_WriteRegisterByte(NRF_REG_RX_PW_P0,32); //00111111 - 32 bytes
@@ -103,9 +104,9 @@ NRF_Status ReceiveData (uint8_t *data, uint32_t len){
 	uint8_t STATUS_REGISTER_RX_DR_BIT = 6;
 	if(status & (1<<STATUS_REGISTER_RX_DR_BIT)){
 		NRF_ReadPayload(data,len);
-		NRF_WriteAckPayload(0 , Ack_data, 1);
 		ret = NRF_OK;
 		NRF_SetRegisterBit(NRF_REG_STATUS, 6);
+		NRF_WriteAckPayload(0 , Ack_data, 1);
 	} else {
 		ret = NRF_ERROR;
 	}
@@ -170,17 +171,21 @@ int main(void)
   //definicao do robo por meio da entrada de tensao no pinc10 e Pinc11//
   PinState[0]= HAL_GPIO_ReadPin(GPIOC,GPIO_PIN_10);
   PinState[1]= HAL_GPIO_ReadPin(GPIOC,GPIO_PIN_11);
+  uint8_t robonum = 5 ;
   uint8_t TxAdress0[] = {1,2,3,4,5};
   uint8_t TxAdress1[] = {2,21,15,5,6};
   uint8_t TxAdress2[] = {5,1,8,2,7};
-  if((PinState[0]==0)&&(PinState[1]==0)){
+  if((PinState[0]==1)&&(PinState[1]==1)){
 	  Rx_mode(TxAdress0);
+	  robonum = 0;
   }
-  if(PinState[0]==1){
+  if(PinState[0]==0){
   	  Rx_mode(TxAdress1);
+  	  robonum = 1;
   }
-  if(PinState[1]==1){
+  if(PinState[1]==0){
   	  Rx_mode(TxAdress2);
+  	  robonum = 2;
   }
   NRF_Status ret = NRF_OK;
   while (1)
