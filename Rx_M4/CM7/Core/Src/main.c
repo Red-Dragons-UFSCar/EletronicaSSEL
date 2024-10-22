@@ -90,6 +90,14 @@ void put_M7(uint8_t buffer[32]); // put data from M7 to M4
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+float elevado (uint32_t num , uint8_t pot){
+	float res = 1;
+	for(int n=0;n<pot;n++){
+		res = res*num;
+	}
+	return res;
+}
+
 int * get_M4() // get data from M4 to M7 buffer
 {
 	static int buffer[6]; // buffer to receive data
@@ -230,8 +238,11 @@ Error_Handler();
 	  ref[i] =0;
   }
   HAL_Delay(7000);
+  uint32_t Leitura= 0;
+  float Leitura2 = 0;
   while (1)
   {
+	  /*
 	      //comunicacao entre cores
 	  	  if (xfr_ptr->sts_4to7 == 1)
 	  	  {
@@ -258,6 +269,18 @@ Error_Handler();
 	  	  CDC_Transmit_FS(message,sizeof(message));
 
 	  	  //delay
+	  	   *
+	  	   */
+	  	  for(uint8_t i = 0;i<4;i++){
+	  		  ref[i] = 6;
+	  	  }
+	  	  //Iniciar ADC
+	  	  HAL_ADC_Start(&hadc1);
+	  	  HAL_ADC_PollForConversion(&hadc1, HAL_MAX_DELAY);
+	  	  Leitura = HAL_ADC_GetValue(&hadc1);
+	  	  Leitura2 = (Leitura*3.3)/elevado(2,16);
+
+
 	  	  HAL_Delay(10);
     /* USER CODE END WHILE */
 
