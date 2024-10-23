@@ -242,7 +242,6 @@ Error_Handler();
   float Leitura2 = 0;
   while (1)
   {
-	  /*
 	      //comunicacao entre cores
 	  	  if (xfr_ptr->sts_4to7 == 1)
 	  	  {
@@ -261,16 +260,14 @@ Error_Handler();
 	  	  }
 
 	  	  for(uint8_t n=0; n<4;n++)
-	  		 ref[n] = old_mensagem[n+1];
+	  		 ref[n] = old_mensagem[n+1]/10.0;
 
 
 	  	  //print para o putty
-	  	  sprintf(message, "%f\n \r",velocidade[3]);
-	  	  CDC_Transmit_FS(message,sizeof(message));
+	  	  //sprintf(message, "%f\n \r",velocidade[3]);
+	  	  //CDC_Transmit_FS(message,sizeof(message));
 
-	  	  //delay
-	  	   *
-	  	   */
+
 	  	  for(uint8_t i = 0;i<4;i++){
 	  		  ref[i] = 6;
 	  	  }
@@ -278,7 +275,7 @@ Error_Handler();
 	  	  HAL_ADC_Start(&hadc1);
 	  	  HAL_ADC_PollForConversion(&hadc1, HAL_MAX_DELAY);
 	  	  Leitura = HAL_ADC_GetValue(&hadc1);
-	  	  Leitura2 = (Leitura*3.3)/elevado(2,16);
+	  	  Leitura2 = (Leitura*3.3)/65535;
 
 
 	  	  HAL_Delay(10);

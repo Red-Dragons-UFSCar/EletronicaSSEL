@@ -62,7 +62,7 @@ struct shared_data
 // pointer to shared_data struct (inter-core buffers and status)
 volatile struct shared_data * const xfr_ptr = (struct shared_data *)0x38001000;
 int RxData[6];
-uint8_t Ack_data = 1;
+int Ack_data = 1;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -93,7 +93,7 @@ void Rx_mode(uint8_t Adress[5]){
 
 	NRF_WriteRegister(NRF_REG_RX_ADDR_P0,Adress,5);
 
-	NRF_WriteRegisterByte(NRF_REG_RX_PW_P0,32); //00111111 - 32 bytes
+	NRF_WriteRegisterByte(NRF_REG_RX_PW_P0,sizeof(RxData)); //00111111 - 32 bytes
 
 	NRF_EnterMode(NRF_MODE_RX);
 }
@@ -101,12 +101,12 @@ void Rx_mode(uint8_t Adress[5]){
 NRF_Status ReceiveData (uint8_t *data, uint32_t len){
 	NRF_Status ret = NRF_ERROR;
 	uint8_t status = NRF_ReadStatus();
+	NRF_WriteAckPayload(0 , Ack_data, 1);
 	uint8_t STATUS_REGISTER_RX_DR_BIT = 6;
 	if(status & (1<<STATUS_REGISTER_RX_DR_BIT)){
 		NRF_ReadPayload(data,len);
 		ret = NRF_OK;
 		NRF_SetRegisterBit(NRF_REG_STATUS, 6);
-		NRF_WriteAckPayload(0 , Ack_data, 1);
 	} else {
 		ret = NRF_ERROR;
 	}

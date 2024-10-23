@@ -33,11 +33,11 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, READONLY, DEBUGGING, OCTETS
  14 .debug_macro  0003a05f  00000000  00000000  00013672  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 15 .debug_line   0000d484  00000000  00000000  0004d6d1  2**0
+ 15 .debug_line   0000d486  00000000  00000000  0004d6d1  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 16 .debug_str    0017cbcd  00000000  00000000  0005ab55  2**0
+ 16 .debug_str    0017cbcd  00000000  00000000  0005ab57  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 17 .comment      00000043  00000000  00000000  001d7722  2**0
+ 17 .comment      00000043  00000000  00000000  001d7724  2**0
                   CONTENTS, READONLY
  18 .debug_frame  00002764  00000000  00000000  001d7768  2**2
                   CONTENTS, READONLY, DEBUGGING, OCTETS
@@ -592,8 +592,8 @@ void Rx_mode(uint8_t Adress[5]){
  810076a:	200a      	movs	r0, #10
  810076c:	f000 fa20 	bl	8100bb0 <NRF_WriteRegister>
 
-	NRF_WriteRegisterByte(NRF_REG_RX_PW_P0,32); //00111111 - 32 bytes
- 8100770:	2120      	movs	r1, #32
+	NRF_WriteRegisterByte(NRF_REG_RX_PW_P0,sizeof(RxData)); //00111111 - 32 bytes
+ 8100770:	2118      	movs	r1, #24
  8100772:	2011      	movs	r0, #17
  8100774:	f000 fa32 	bl	8100bdc <NRF_WriteRegisterByte>
 
@@ -624,36 +624,36 @@ NRF_Status ReceiveData (uint8_t *data, uint32_t len){
  810079e:	f000 fa47 	bl	8100c30 <NRF_ReadStatus>
  81007a2:	4603      	mov	r3, r0
  81007a4:	73bb      	strb	r3, [r7, #14]
+	NRF_WriteAckPayload(0 , Ack_data, 1);
+ 81007a6:	4b12      	ldr	r3, [pc, #72]	@ (81007f0 <ReceiveData+0x60>)
+ 81007a8:	681b      	ldr	r3, [r3, #0]
+ 81007aa:	2201      	movs	r2, #1
+ 81007ac:	4619      	mov	r1, r3
+ 81007ae:	2000      	movs	r0, #0
+ 81007b0:	f000 fc0a 	bl	8100fc8 <NRF_WriteAckPayload>
 	uint8_t STATUS_REGISTER_RX_DR_BIT = 6;
- 81007a6:	2306      	movs	r3, #6
- 81007a8:	737b      	strb	r3, [r7, #13]
+ 81007b4:	2306      	movs	r3, #6
+ 81007b6:	737b      	strb	r3, [r7, #13]
 	if(status & (1<<STATUS_REGISTER_RX_DR_BIT)){
- 81007aa:	7bba      	ldrb	r2, [r7, #14]
- 81007ac:	7b7b      	ldrb	r3, [r7, #13]
- 81007ae:	fa42 f303 	asr.w	r3, r2, r3
- 81007b2:	f003 0301 	and.w	r3, r3, #1
- 81007b6:	2b00      	cmp	r3, #0
- 81007b8:	d013      	beq.n	81007e2 <ReceiveData+0x52>
+ 81007b8:	7bba      	ldrb	r2, [r7, #14]
+ 81007ba:	7b7b      	ldrb	r3, [r7, #13]
+ 81007bc:	fa42 f303 	asr.w	r3, r2, r3
+ 81007c0:	f003 0301 	and.w	r3, r3, #1
+ 81007c4:	2b00      	cmp	r3, #0
+ 81007c6:	d00c      	beq.n	81007e2 <ReceiveData+0x52>
 		NRF_ReadPayload(data,len);
- 81007ba:	683b      	ldr	r3, [r7, #0]
- 81007bc:	b2db      	uxtb	r3, r3
- 81007be:	4619      	mov	r1, r3
- 81007c0:	6878      	ldr	r0, [r7, #4]
- 81007c2:	f000 fc17 	bl	8100ff4 <NRF_ReadPayload>
+ 81007c8:	683b      	ldr	r3, [r7, #0]
+ 81007ca:	b2db      	uxtb	r3, r3
+ 81007cc:	4619      	mov	r1, r3
+ 81007ce:	6878      	ldr	r0, [r7, #4]
+ 81007d0:	f000 fc10 	bl	8100ff4 <NRF_ReadPayload>
 		ret = NRF_OK;
- 81007c6:	2300      	movs	r3, #0
- 81007c8:	73fb      	strb	r3, [r7, #15]
+ 81007d4:	2300      	movs	r3, #0
+ 81007d6:	73fb      	strb	r3, [r7, #15]
 		NRF_SetRegisterBit(NRF_REG_STATUS, 6);
- 81007ca:	2106      	movs	r1, #6
- 81007cc:	2007      	movs	r0, #7
- 81007ce:	f000 fa4b 	bl	8100c68 <NRF_SetRegisterBit>
-		NRF_WriteAckPayload(0 , Ack_data, 1);
- 81007d2:	4b07      	ldr	r3, [pc, #28]	@ (81007f0 <ReceiveData+0x60>)
- 81007d4:	781b      	ldrb	r3, [r3, #0]
- 81007d6:	2201      	movs	r2, #1
- 81007d8:	4619      	mov	r1, r3
- 81007da:	2000      	movs	r0, #0
- 81007dc:	f000 fbf4 	bl	8100fc8 <NRF_WriteAckPayload>
+ 81007d8:	2106      	movs	r1, #6
+ 81007da:	2007      	movs	r0, #7
+ 81007dc:	f000 fa44 	bl	8100c68 <NRF_SetRegisterBit>
  81007e0:	e001      	b.n	81007e6 <ReceiveData+0x56>
 	} else {
 		ret = NRF_ERROR;

@@ -67,7 +67,7 @@ int * get_M7() // get data from M4 to M7 buffer
 		xfr_ptr->sts_7to4 = 2; // lock the M4 to M7 buffer
 		for(int n = 0; n < 12; n++)
 		{
-			buffer[n] = xfr_ptr->M4toM7[n]; // transfer data
+			buffer[n] = xfr_ptr->M7toM4[n]; // transfer data
 			xfr_ptr->M7toM4[n] = 0; // clear M4 to M7 buffer
 		}
 		xfr_ptr->sts_7to4 = 0; // M4 to M7 buffer is empty
@@ -76,8 +76,8 @@ int * get_M7() // get data from M4 to M7 buffer
 }
 
 uint8_t TxAdress0[] = {1,2,3,4,5};
-uint8_t TxAdress1[] = {2,21,15,5,6};
-uint8_t TxAdress2[] = {5,1,8,2,7};
+uint8_t TxAdress1[] = {6,7,8,9,10};
+uint8_t TxAdress2[] = {11,12,13,14,15};
 
 int TxData[6]={111,0,0,0,0,112};
 uint8_t RxData[1];
@@ -136,22 +136,6 @@ void Rx_mode(uint8_t Adress[5]){
 	NRF_EnterMode(NRF_MODE_RX);
 }
 
-NRF_Status ReceiveData (uint8_t *data){
-	NRF_Status ret = NRF_ERROR;
-	uint8_t status = NRF_ReadStatus();
-	uint8_t STATUS_REGISTER_RX_DR_BIT = 6;
-	if(status & (1<<STATUS_REGISTER_RX_DR_BIT)){
-		NRF_ReadPayload(data, 32);
-		ret = NRF_OK;
-		NRF_SetRegisterBit(NRF_REG_STATUS, 6);
-	} else {
-		ret = NRF_ERROR;
-	}
-	return ret;
-}
-
-
-
 /* USER CODE END 0 */
 
 /**
@@ -208,8 +192,9 @@ int main(void)
   xfr_ptr->sts_7to4 = 0;
   int *xfr_dataM4;
   int Valores[12];
-  int Returns[9];
-  uint32_t acumulador[3];
+  int Returns[9]={0,0,0,0,0,0,0,0,0};
+  uint32_t acumulador[3] = {1,1,1};
+
   while (1)
   {
 	 if(xfr_ptr->sts_7to4 == 1){
@@ -228,34 +213,36 @@ int main(void)
 		 uint32_t End = HAL_GetTick();
 		 acumulador[i]+= End - Start;
 		 uint8_t ploss = NRF_ReadPacketLoss();
+		 Returns[i+3] = acumulador[i];
 		 if(ret == NRF_OK){
 
 			 //Pino de confirmação
 			 HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_14);
 			 //Lê o ACK payload e printa no serial
 			 NRF_ReadPayload(&Returns[i],4); //Verificar este linhas !!!!!!!!!!!!!!!!!!!!
-			 Returns[i+3] = acumulador[i];
+
 			 Returns[i+6] = ploss;
 			 acumulador[i] = 0;
-		 } else if(ret = NRF_MAX_RT) {
+		 } else if(ret == NRF_MAX_RT) {
 			 HAL_GPIO_TogglePin(GPIOE, GPIO_PIN_1);
 
 	 } else {
 		 HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_0);
 	 }
-	 if(xfr_ptr->sts_4to7 == 0){
-		 for(uint8_t n = 0 ;n<9;n++){
-			 xfr_ptr->M4toM7[n] = Returns[i];
-		 }
-	 	 xfr_ptr->sts_4to7 = 1;
+	HAL_Delay(1);
 	 }
+	 if(xfr_ptr->sts_4to7 == 0){
+	 		 for(uint8_t n = 0 ;n<9;n++){
+	 			 xfr_ptr->M4toM7[n] = Returns[n];
+	 		 }
+	 	 	 xfr_ptr->sts_4to7 = 1;
+	 	 }
 
-	  HAL_Delay(100);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
 
-  }
+
   /* USER CODE END 3 */
 }
 }

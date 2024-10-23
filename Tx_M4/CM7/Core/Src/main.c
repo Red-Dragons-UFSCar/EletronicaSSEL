@@ -189,15 +189,21 @@ Error_Handler();
 		Retorno[i] = xfr_data[i];
 	  }
 	CDC_Receive_FS(Software,sizeof(Software));
-	Retorno[0] = Software[1];
-	sprintf(message, "%d\n",Retorno[0]);
+	sprintf(message, "oi %d %d %d %d %d %d %d %d %d\n",Retorno[0],Retorno[1],Retorno[2],Retorno[3],Retorno[4],Retorno[5],Retorno[6],Retorno[7],Retorno[8],Retorno[9]);
 	CDC_Transmit_FS(message,sizeof(message));
 	if(xfr_ptr->sts_7to4 == 0){
 		 xfr_ptr->sts_7to4 = 1;
 	 }
 
+	if(xfr_ptr->sts_7to4 == 0){
+			 for(int n = 0; n < 12; n++){
+			 	xfr_ptr->M7toM4[n] = Software[n];
+			 	}
+			 xfr_ptr->sts_7to4 =1;
+		 }
 
-	HAL_Delay(1000);
+
+	HAL_Delay(1);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
