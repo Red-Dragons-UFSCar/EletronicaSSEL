@@ -151,6 +151,31 @@ while True:
         print("Trás direita: ", robot.wheel_velocity_back_right)
         print("Trás esquerda: ", robot.wheel_velocity_back_left)
 
+    # Caso a interface com o teclado não esteja pronta ainda, descomente as linhas abaixo
+    # Elas possuem casos padrão para testes básicos de validação.
+
+    # Robô 0 a 0.5m/s pra frente - descomentar as próximas 5 linhas
+    # robot0 = receiver.robots[0]
+    # robot0.wheel_velocity_front_right = 3.33333
+    # robot0.wheel_velocity_front_left = 3.33333
+    # robot0.wheel_velocity_back_right = 3.33333
+    # robot0.wheel_velocity_back_left = 3.33333
+
+    # Robô 1 a 0.5m/s pra cima - descomentar as próximas 5 linhas
+    # robot1 = receiver.robots[1]
+    # robot1.wheel_velocity_front_right = 9.25926
+    # robot1.wheel_velocity_front_left = 9.259256
+    # robot1.wheel_velocity_back_right = -13.09457
+    # robot1.wheel_velocity_back_left = -13.09457
+
+    # Robô 2 a 1 rad/s (apenas girando) - descomentar as próximas 5 linhas
+    # robot2 = receiver.robots[2]
+    # robot2.wheel_velocity_front_right = -16.03751
+    # robot2.wheel_velocity_front_left = 16.03751
+    # robot2.wheel_velocity_back_right = -13.09457
+    # robot2.wheel_velocity_back_left = -13.09457
+
+
     # ---------------------------------------------------------------------------------------------
     #   ESCREVA SEU CÓDIGO AQUI, MESTRES DOS 10 PINOS
     # ---------------------------------------------------------------------------------------------
