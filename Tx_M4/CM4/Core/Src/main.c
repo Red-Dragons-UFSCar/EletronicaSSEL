@@ -76,8 +76,7 @@ int * get_M7() // get data from M4 to M7 buffer
 }
 
 uint8_t TxAdress0[] = {1,2,3,4,5};
-uint8_t TxAdress1[] = {6,7,8,9,10};
-uint8_t TxAdress2[] = {11,12,13,14,15};
+
 
 int TxData[6]={111,0,0,0,0,112};
 uint8_t RxData[1];
@@ -105,19 +104,16 @@ void Tx_mode(uint8_t Adress[5]){
 	NRF_WriteRegister(NRF_REG_RX_ADDR_P0, Adress, 5);
 }
 
-void changeAddress(uint8_t n){
+void changeChannel(uint8_t n){
 	NRF_EnterMode(NRF_MODE_STANDBY1);
 	if(n==0){
-		NRF_WriteRegister(NRF_REG_TX_ADDR,TxAdress0,5);
-		NRF_WriteRegister(NRF_REG_RX_ADDR_P0, TxAdress0, 5);
+		NRF_WriteRegisterByte(NRF_REG_RF_CH,0x02); //Canal 3
 	}
 	if(n==1){
-		NRF_WriteRegister(NRF_REG_TX_ADDR,TxAdress1,5);
-		NRF_WriteRegister(NRF_REG_RX_ADDR_P0, TxAdress1, 5);
+		NRF_WriteRegisterByte(NRF_REG_RF_CH,0x03); //Canal 4
 	}
 	if(n==2){
-		NRF_WriteRegister(NRF_REG_TX_ADDR,TxAdress2,5);
-		NRF_WriteRegister(NRF_REG_RX_ADDR_P0, TxAdress2, 5);
+		NRF_WriteRegisterByte(NRF_REG_RF_CH,0x04); //Canal 5
 	}
 	NRF_EnterMode(NRF_MODE_TX);
 }
@@ -204,7 +200,7 @@ int main(void)
 		Valores[i] = xfr_dataM4[i];
 	  }
 	 for(uint8_t i=0; i<3;i++){
-		 changeAddress(i);
+		 changeChannel(i);
 		 for(uint8_t n=0; n<4;n++){
 			 TxData[n+1] = Valores[n+i*4];
 		 }
@@ -219,8 +215,9 @@ int main(void)
 			 //Pino de confirmação
 			 HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_14);
 			 //Lê o ACK payload e printa no serial
-			 NRF_ReadPayload(&Returns[i],4); //Verificar este linhas !!!!!!!!!!!!!!!!!!!!
-
+			 int ret = 0;
+			 NRF_ReadPayload(&ret,4);
+			 Returns[i] = ret;
 			 Returns[i+6] = ploss;
 			 acumulador[i] = 0;
 		 } else if(ret == NRF_MAX_RT) {

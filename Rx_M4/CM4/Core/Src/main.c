@@ -61,7 +61,7 @@ struct shared_data
 
 // pointer to shared_data struct (inter-core buffers and status)
 volatile struct shared_data * const xfr_ptr = (struct shared_data *)0x38001000;
-int RxData[6];
+int RxData[6] = {0,0,0,0,0,0};
 int Ack_data = 1;
 /* USER CODE END PV */
 
@@ -93,7 +93,7 @@ void Rx_mode(uint8_t Adress[5]){
 
 	NRF_WriteRegister(NRF_REG_RX_ADDR_P0,Adress,5);
 
-	NRF_WriteRegisterByte(NRF_REG_RX_PW_P0,sizeof(RxData)); //00111111 - 32 bytes
+	NRF_WriteRegisterByte(NRF_REG_RX_PW_P0,sizeof(RxData));
 
 	NRF_EnterMode(NRF_MODE_RX);
 }
@@ -171,21 +171,17 @@ int main(void)
   //definicao do robo por meio da entrada de tensao no pinc10 e Pinc11//
   PinState[0]= HAL_GPIO_ReadPin(GPIOC,GPIO_PIN_10);
   PinState[1]= HAL_GPIO_ReadPin(GPIOC,GPIO_PIN_11);
-  uint8_t robonum = 5 ;
+
   uint8_t TxAdress0[] = {1,2,3,4,5};
-  uint8_t TxAdress1[] = {2,21,15,5,6};
-  uint8_t TxAdress2[] = {5,1,8,2,7};
+  Rx_mode(TxAdress0);
   if((PinState[0]==1)&&(PinState[1]==1)){
-	  Rx_mode(TxAdress0);
-	  robonum = 0;
+	  NRF_WriteRegisterByte(NRF_REG_RF_CH,0x02); // Canal 3
   }
   if(PinState[0]==0){
-  	  Rx_mode(TxAdress1);
-  	  robonum = 1;
+	  NRF_WriteRegisterByte(NRF_REG_RF_CH,0x03); // Canal 4
   }
   if(PinState[1]==0){
-  	  Rx_mode(TxAdress2);
-  	  robonum = 2;
+	  NRF_WriteRegisterByte(NRF_REG_RF_CH,0x04); //Canal 5
   }
   NRF_Status ret = NRF_OK;
   while (1)
