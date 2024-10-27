@@ -23,6 +23,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "usbd_cdc_if.h"
+//oi
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
