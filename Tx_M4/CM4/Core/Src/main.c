@@ -117,19 +117,18 @@ void changeChannel(uint8_t n){
 	}
 	NRF_EnterMode(NRF_MODE_TX);
 }
-
-void Rx_mode(uint8_t Adress[5]){
-
-	if(NRF_Init(&hspi1, GPIOG, GPIO_PIN_12, GPIOG, GPIO_PIN_14) != NRF_OK){
-		Error_Handler();
+NRF_Status ReceiveData (uint8_t *data, uint32_t len){
+	NRF_Status ret = NRF_ERROR;
+	uint8_t status = NRF_ReadStatus();
+	uint8_t STATUS_REGISTER_RX_DR_BIT = 6;
+	if(status & (1<<STATUS_REGISTER_RX_DR_BIT)){
+		NRF_ReadPayload(data,len);
+		ret = NRF_OK;
+		NRF_SetRegisterBit(NRF_REG_STATUS, 6);
+	} else {
+		ret = NRF_ERROR;
 	}
-
-	NRF_Reset();
-	NRF_WriteRegister(NRF_REG_RX_ADDR_P0,Adress,5);
-
-	NRF_WriteRegisterByte(NRF_REG_RX_PW_P0,32); //00111111 - 32 bytes
-
-	NRF_EnterMode(NRF_MODE_RX);
+	return ret;
 }
 
 /* USER CODE END 0 */
@@ -211,13 +210,16 @@ int main(void)
 		 uint8_t ploss = NRF_ReadPacketLoss();
 		 Returns[i+3] = acumulador[i];
 		 if(ret == NRF_OK){
-
 			 //Pino de confirmação
 			 HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_14);
 			 //Lê o ACK payload e printa no serial
-			 int ret = 0;
-			 NRF_ReadPayload(&ret,4);
-			 Returns[i] = ret;
+			 int retorno = 0;
+			 //NRF_ReadPayload(&retorno,4);
+			 NRF_Status ret2 =  ReceiveData(&retorno, 4);
+			 if(ret2 == NRF_OK){
+				 HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_0);
+			 }
+			 Returns[i] = retorno;
 			 Returns[i+6] = ploss;
 			 acumulador[i] = 0;
 		 } else if(ret == NRF_MAX_RT) {
@@ -226,7 +228,7 @@ int main(void)
 	 } else {
 		 HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_0);
 	 }
-	HAL_Delay(1);
+	//HAL_Delay(10);
 	 }
 	 if(xfr_ptr->sts_4to7 == 0){
 	 		 for(uint8_t n = 0 ;n<9;n++){

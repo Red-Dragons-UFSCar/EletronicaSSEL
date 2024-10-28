@@ -64,7 +64,7 @@ volatile float preverror[4]= {0,0,0,0};
 //Contador para salvar as variaveis
 uint8_t cont = 0;
 //Valores de DSHOT enviado para os motores
-volatile uint16_t D[4]= {0,0,0,0};
+uint16_t D[4]= {0,0,0,0};
 //Variavejs de valor de encoder e calculo de velocidade
 uint32_t Enc[4] = {0,0,0,0};
 volatile int vel[4] = {0,0,0,0};
@@ -391,9 +391,11 @@ void TIM15_IRQHandler(void)
   HAL_TIM_IRQHandler(&htim15);
   /* USER CODE BEGIN TIM15_IRQn 1 */
   //
-  Enc[0] = TIM4->CNT;
-  Enc[1] = TIM1->CNT;
-  Enc[2] = TIM8->CNT;
+  //Enc[0] = TIM4->CNT;
+  Enc[0] = TIM1->CNT;
+  //Enc[1] = TIM1->CNT;
+  Enc[1] = TIM8->CNT;
+  Enc[2] = TIM4->CNT;
   Enc[3] = TIM3->CNT;
   TIM4->CNT = 0;
   TIM1->CNT = 0;
@@ -403,7 +405,7 @@ void TIM15_IRQHandler(void)
   for(uint8_t i=0;i<4;i++){
 	  vel[i] = Enc[i];
 	  if(vel[i]>60000){
-			  vel[i] = vel[i] - 65356;
+			  vel[i] = vel[i] - 65355;
 	  }
 	  speed[i] = vel[i]/(81.92);
 	  velocidade[i] = speed[i];

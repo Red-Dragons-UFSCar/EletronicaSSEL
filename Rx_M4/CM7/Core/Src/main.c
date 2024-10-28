@@ -234,10 +234,8 @@ Error_Handler();
   /* USER CODE BEGIN WHILE */
   char message[100]={'\0'};
   //Inicializa referencia como zero
-  for(uint8_t i =0;i<4;i++){
-	  ref[i] =0;
-  }
   HAL_Delay(7000);
+
   uint32_t Leitura= 0;
   float Leitura2 = 0;
   while (1)
@@ -245,40 +243,40 @@ Error_Handler();
 	      //comunicacao entre cores
 	  	  if (xfr_ptr->sts_4to7 == 1)
 	  	  {
-	  		  xfr_data = get_M4(); // get data sent from M4 to M7
+	  		 // xfr_data = get_M4(); // get data sent from M4 to M7
 	  	  }
 
 	  	  for(uint8_t n = 0; n<32;n++){
-	  		  new_mensagem[n] = xfr_data[n]; //guarda numa variavel local a data recebida do outro core
+	  		 // new_mensagem[n] = xfr_data[n]; //guarda numa variavel local a data recebida do outro core
 	  	  }
 
 	  	  //validacao da mensagem, utilizamos 111 como um ID de inicio e 112 de final
 
 	  	  if((new_mensagem[0]==111)&&(new_mensagem[31]==112)){
-	  		for(uint8_t n=0;n<6;n++)
+	  		for(uint8_t n=0;n<6;n++){
 	  		  old_mensagem[n] = new_mensagem[n];
+	  		}
 	  	  }
-
-	  	  for(uint8_t n=0; n<4;n++)
+	  	  /*
+	  	  for(uint8_t n=0; n<4;n++){
 	  		 ref[n] = old_mensagem[n+1]/10.0;
-
+	  	  }
+	  	  */
+	  	for(uint8_t n=0; n<4;n++){
+	  		  	ref[n] =10.0;
+	  		  	  }
 
 	  	  //print para o putty
-	  	  //sprintf(message, "%f\n \r",velocidade[3]);
+	  	  //sprintf(message, "%f\n \r", ref[0]);
 	  	  //CDC_Transmit_FS(message,sizeof(message));
 
-
-	  	  for(uint8_t i = 0;i<4;i++){
-	  		  ref[i] = 6;
-	  	  }
 	  	  //Iniciar ADC
+
 	  	  HAL_ADC_Start(&hadc1);
 	  	  HAL_ADC_PollForConversion(&hadc1, HAL_MAX_DELAY);
 	  	  Leitura = HAL_ADC_GetValue(&hadc1);
 	  	  Leitura2 = (Leitura*3.3)/65535;
 
-
-	  	  HAL_Delay(10);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
