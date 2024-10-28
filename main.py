@@ -3,7 +3,7 @@ import socket
 import threading
 from proto.ssl_simulation_robot_control_pb2 import RobotControl
 
-RECEIVER_FPS = 300  # Taxa de aquisição da rede dos pacotes do software
+RECEIVER_FPS = 3000  # Taxa de aquisição da rede dos pacotes do software
 CONTROL_FPS = 60  # Taxa de envio para o STM (Pode alterar aqui se necessário)
 
 # ---------------------------------------------------------------------------------------------
