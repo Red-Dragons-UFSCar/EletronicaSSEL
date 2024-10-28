@@ -1,5 +1,5 @@
-../Core/Src/main.c:64:7:get_M4	3
-../Core/Src/main.c:97:5:main	13
-../Core/Src/main.c:218:6:SystemClock_Config	4
-../Core/Src/main.c:279:13:MX_GPIO_Init	1
-../Core/Src/main.c:335:6:Error_Handler	1
+../Core/Src/main.c:65:7:get_M4	3
+../Core/Src/main.c:98:5:main	13
+../Core/Src/main.c:219:6:SystemClock_Config	4
+../Core/Src/main.c:280:13:MX_GPIO_Init	1
+../Core/Src/main.c:336:6:Error_Handler	1

@@ -174,14 +174,17 @@ int main(void)
 
   uint8_t TxAdress0[] = {1,2,3,4,5};
   Rx_mode(TxAdress0);
-  if((PinState[0]==1)&&(PinState[1]==1)){
+  if((PinState[0]==0)&&(PinState[1]==0)){
 	  NRF_WriteRegisterByte(NRF_REG_RF_CH,0x02); // Canal 3
+
   }
-  if(PinState[0]==0){
+  if(PinState[0]==1){
 	  NRF_WriteRegisterByte(NRF_REG_RF_CH,0x03); // Canal 4
+	  HAL_GPIO_TogglePin(GPIOE, GPIO_PIN_0);
   }
-  if(PinState[1]==0){
+  if(PinState[1]==1){
 	  NRF_WriteRegisterByte(NRF_REG_RF_CH,0x04); //Canal 5
+	  HAL_GPIO_TogglePin(GPIOE, GPIO_PIN_2);
   }
   NRF_Status ret = NRF_OK;
   while (1)
@@ -204,10 +207,10 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-
+  }
   /* USER CODE END 3 */
 }
-}
+
 /**
   * @brief Peripherals Common Clock Configuration
   * @retval None
