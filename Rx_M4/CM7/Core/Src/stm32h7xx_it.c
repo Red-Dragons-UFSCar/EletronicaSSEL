@@ -394,9 +394,9 @@ void TIM15_IRQHandler(void)
   //Enc[0] = TIM4->CNT;
   Enc[0] = TIM1->CNT;
   //Enc[1] = TIM1->CNT;
-  Enc[1] = TIM8->CNT;
+  Enc[1] = TIM3->CNT;
   Enc[2] = TIM4->CNT;
-  Enc[3] = TIM3->CNT;
+  Enc[3] = TIM8->CNT;
   TIM4->CNT = 0;
   TIM1->CNT = 0;
   TIM8->CNT = 0;
@@ -407,7 +407,7 @@ void TIM15_IRQHandler(void)
 	  if(vel[i]>60000){
 			  vel[i] = vel[i] - 65355;
 	  }
-	  speed[i] = vel[i]/(81.92);
+	  speed[i] = vel[i]/(163.84);
 	  velocidade[i] = speed[i];
   }
 

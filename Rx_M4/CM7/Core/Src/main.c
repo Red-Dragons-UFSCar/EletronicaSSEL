@@ -98,20 +98,19 @@ float elevado (uint32_t num , uint8_t pot){
 	return res;
 }
 
-int * get_M4() // get data from M4 to M7 buffer
+void  get_M4(int *data) // get data from M4 to M7 buffer
 {
-	static int buffer[6]; // buffer to receive data
 	if (xfr_ptr->sts_4to7 == 1) // if M4 to M7 buffer has data
 	{
 		xfr_ptr->sts_4to7 = 2; // lock the M4 to M7 buffer
 		for(int n = 0; n < 6; n++)
 		{
-			buffer[n] = xfr_ptr->M4toM7[n]; // transfer data
+			data[n] = xfr_ptr->M4toM7[n]; // transfer data
 			xfr_ptr->M4toM7[n] = 0; // clear M4 to M7 buffer
 		}
 		xfr_ptr->sts_4to7 = 0; // M4 to M7 buffer is empty
 	}
-	return buffer; // return the buffer (pointer)
+	// return the buffer (pointer)
 }
 void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim){
 	contador = __HAL_TIM_GET_COUNTER(&htim4);
@@ -238,16 +237,13 @@ Error_Handler();
 
   uint32_t Leitura= 0;
   float Leitura2 = 0;
+  extern volatile float speed[4];
   while (1)
   {
 	      //comunicacao entre cores
 	  	  if (xfr_ptr->sts_4to7 == 1)
 	  	  {
-	  		 // xfr_data = get_M4(); // get data sent from M4 to M7
-	  	  }
-
-	  	  for(uint8_t n = 0; n<32;n++){
-	  		 // new_mensagem[n] = xfr_data[n]; //guarda numa variavel local a data recebida do outro core
+	  		 get_M4(new_mensagem); // get data sent from M4 to M7
 	  	  }
 
 	  	  //validacao da mensagem, utilizamos 111 como um ID de inicio e 112 de final
@@ -267,8 +263,8 @@ Error_Handler();
 	  		  	  }
 
 	  	  //print para o putty
-	  	  //sprintf(message, "%f\n \r", ref[0]);
-	  	  //CDC_Transmit_FS(message,sizeof(message));
+	  	  sprintf(message, "%f a %f %f %f\n \r", speed[0], speed[1],speed[2], speed[3]);
+	  	  CDC_Transmit_FS(message,sizeof(message));
 
 	  	  //Iniciar ADC
 
