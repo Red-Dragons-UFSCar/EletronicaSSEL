@@ -159,7 +159,7 @@ while running:
 
                     print("IP: ", ip)
                     print("Porta: ", port )
-                    actuator = Actuator(ip=ip, team_port=port, logger=True)
+                    actuator = Actuator(ip=ip, team_port=port, logger=False)
                     connected = not connected  # Alternar o estado de conexão
             else:
                 # Verificar se o clique foi em um campo de texto
