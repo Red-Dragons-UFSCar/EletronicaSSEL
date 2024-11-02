@@ -62,20 +62,19 @@ struct shared_data
 // pointer to shared_data struct (inter-core buffers and status)
 volatile struct shared_data * const xfr_ptr = (struct shared_data *)0x38001000;
 
-int * get_M4() // get data from M4 to M7 buffer
+void  get_M4(int *data) // get data from M4 to M7 buffer
 {
-	static int buffer[9]; // buffer to receive data
+	 // buffer to receive data
 	if (xfr_ptr->sts_4to7 == 1) // if M4 to M7 buffer has data
 	{
 		xfr_ptr->sts_4to7 = 2; // lock the M4 to M7 buffer
 		for(int n = 0; n < 9; n++)
 		{
-			buffer[n] = xfr_ptr->M4toM7[n]; // transfer data
+			data[n] = xfr_ptr->M4toM7[n]; // transfer data
 			xfr_ptr->M4toM7[n] = 0; // clear M4 to M7 buffer
 		}
 		xfr_ptr->sts_4to7 = 0; // M4 to M7 buffer is empty
-	}
-	return buffer; // return the buffer (pointer)
+	} // return the buffer (pointer)
 }
 /* USER CODE END PV */
 
@@ -177,30 +176,28 @@ Error_Handler();
   /* USER CODE BEGIN WHILE */
   xfr_ptr->sts_4to7 = 0;
   xfr_ptr->sts_7to4 = 0;
-  int *xfr_data;
+
   char message[100] = {'\0'};
-  int Retorno[9] = {20,20,20,0,0,0,0,0,0};//Correntes (3 robos), Latência (3 Robos), Perda de Pacote (3 Robos)
+  int Retorno[9] = {0,0,0,0,0,0,0,0,0};//Correntes (3 robos), Latência (3 Robos), Perda de Pacote (3 Robos)
   int Software[12] = {0,0,0,0,0,0,0,0,0,0,0,0}; //((vel)*4Rodas)*3Robos
   while (1)
   {
 	  if(xfr_ptr->sts_4to7 == 1){
-		xfr_data = get_M4();
-	  }
-	  for(uint8_t i=0; i<9;i++){
-		Retorno[i] = xfr_data[i];
+		get_M4(Retorno);
 	  }
 	CDC_Receive_FS(Software,sizeof(Software));
-	sprintf(message, "oi %d %d %d %d %d %d %d %d %d\n",Retorno[0],Retorno[1],Retorno[2],Retorno[3],Retorno[4],Retorno[5],Retorno[6],Retorno[7],Retorno[8],Retorno[9]);
+	sprintf(message, "oi %d %d %d %d %d %d %d %d %d\n",Software[0],Retorno[1],Retorno[2],Retorno[3],Retorno[4],Retorno[5],Retorno[6],Retorno[7],Retorno[8],Retorno[9]);
 	CDC_Transmit_FS(message,sizeof(message));
+	/*
 	if(xfr_ptr->sts_7to4 == 0){
 		 xfr_ptr->sts_7to4 = 1;
 	 }
-
+	*/
 	if(xfr_ptr->sts_7to4 == 0){
 			 for(int n = 0; n < 12; n++){
 			 	xfr_ptr->M7toM4[n] = Software[n];
 			 	}
-			 xfr_ptr->sts_7to4 =1;
+			 xfr_ptr->sts_7to4 = 1;
 		 }
 
 

@@ -48,9 +48,9 @@
 //Referência de velocidade (Vindo da main)
 extern float ref[4];
 //Constantes de Controle
-static float Kc =25 ;
+static float Kc =25;
 static float Ki = 3 ;
-static float Kd = 0.005;
+static float Kd = 0;
 // Erro
 volatile float error[4] = {0,0,0,0};
 //Varição da ação de controle
@@ -394,9 +394,9 @@ void TIM15_IRQHandler(void)
   //Enc[0] = TIM4->CNT;
   Enc[0] = TIM1->CNT;
   //Enc[1] = TIM1->CNT;
-  Enc[1] = TIM3->CNT;
-  Enc[2] = TIM4->CNT;
-  Enc[3] = TIM8->CNT;
+  Enc[2] = TIM3->CNT;
+  Enc[3] = TIM4->CNT;
+  Enc[1] = TIM8->CNT;
   TIM4->CNT = 0;
   TIM1->CNT = 0;
   TIM8->CNT = 0;
@@ -407,7 +407,7 @@ void TIM15_IRQHandler(void)
 	  if(vel[i]>60000){
 			  vel[i] = vel[i] - 65355;
 	  }
-	  speed[i] = vel[i]/(163.84);
+	  speed[i] = -1*vel[i]/(163.84);
 	  velocidade[i] = speed[i];
   }
 

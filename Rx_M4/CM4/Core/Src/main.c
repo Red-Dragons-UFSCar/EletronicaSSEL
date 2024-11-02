@@ -101,7 +101,6 @@ void Rx_mode(uint8_t Adress[5]){
 NRF_Status ReceiveData (uint8_t *data, uint32_t len){
 	NRF_Status ret = NRF_ERROR;
 	uint8_t status = NRF_ReadStatus();
-	NRF_WriteAckPayload(0 , Ack_data, sizeof(Ack_data));
 	uint8_t STATUS_REGISTER_RX_DR_BIT = 6;
 	if(status & (1<<STATUS_REGISTER_RX_DR_BIT)){
 		NRF_ReadPayload(data,len);

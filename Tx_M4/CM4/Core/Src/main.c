@@ -59,20 +59,18 @@ struct shared_data
 // pointer to shared_data struct (inter-core buffers and status)
 volatile struct shared_data * const xfr_ptr = (struct shared_data *)0x38001000;
 
-int * get_M7() // get data from M4 to M7 buffer
+void get_M7(int *data) // get data from M4 to M7 buffer
 {
-	static int buffer[12]; // buffer to receive data
 	if (xfr_ptr->sts_7to4 == 1) // if M4 to M7 buffer has data
 	{
 		xfr_ptr->sts_7to4 = 2; // lock the M4 to M7 buffer
 		for(int n = 0; n < 12; n++)
 		{
-			buffer[n] = xfr_ptr->M7toM4[n]; // transfer data
+			data[n] = xfr_ptr->M7toM4[n]; // transfer data
 			xfr_ptr->M7toM4[n] = 0; // clear M4 to M7 buffer
 		}
 		xfr_ptr->sts_7to4 = 0; // M4 to M7 buffer is empty
 	}
-	return buffer; // return the buffer (pointer)
 }
 
 uint8_t TxAdress0[] = {1,2,3,4,5};
@@ -185,40 +183,33 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   xfr_ptr->sts_4to7 = 0;
   xfr_ptr->sts_7to4 = 0;
-  int *xfr_dataM4;
-  int Valores[12];
+  int Valores[12] = {0,0,0,0,0,0,0,0,0,0,0,0};
   int Returns[9]={0,0,0,0,0,0,0,0,0};
   uint32_t acumulador[3] = {1,1,1};
 
   while (1)
   {
+	  //Obtem os valores do core M7
 	 if(xfr_ptr->sts_7to4 == 1){
-		xfr_dataM4 = get_M7();
+		get_M7(Valores);
 	  }
-	  for(uint8_t i=0; i<12;i++){
-		Valores[i] = xfr_dataM4[i];
-	  }
+	 //Loop entre Robos
 	 for(uint8_t i=0; i<3;i++){
-		 changeChannel(i);
+		 changeChannel(i); //Troca o canal para o  do robo especifico
+		 //Salva a variável para envio em seu respectivo vetor
 		 for(uint8_t n=0; n<4;n++){
 			 TxData[n+1] = Valores[n+i*4];
 		 }
-		 uint32_t Start = HAL_GetTick();
-		 ret = NRF_TransmitAndWait(TxData, sizeof(TxData));
-		 uint32_t End = HAL_GetTick();
-		 acumulador[i]+= End - Start;
-		 uint8_t ploss = NRF_ReadPacketLoss();
+		 uint32_t Start = HAL_GetTick(); //Tempo de início de transmissão
+		 ret = NRF_TransmitAndWait(TxData, sizeof(TxData)); //Transmissão da mensagem
+		 uint32_t End = HAL_GetTick(); //Tempo de fim de transmissão
+		 acumulador[i]+= End - Start; //Acumulador de tempo de latência
+		 uint8_t ploss = NRF_ReadPacketLoss();//Leitura da perda de pacotes
 		 Returns[i+3] = acumulador[i];
 		 if(ret == NRF_OK){
 			 //Pino de confirmação
 			 HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_14);
-			 //Lê o ACK payload e printa no serial
 			 int retorno = 0;
-			 //NRF_ReadPayload(&retorno,4);
-			 NRF_Status ret2 =  ReceiveData(&retorno, 4);
-			 if(ret2 == NRF_OK){
-				 HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_0);
-			 }
 			 Returns[i] = retorno;
 			 Returns[i+6] = ploss;
 			 acumulador[i] = 0;
@@ -234,6 +225,7 @@ int main(void)
 	 		 for(uint8_t n = 0 ;n<9;n++){
 	 			 xfr_ptr->M4toM7[n] = Returns[n];
 	 		 }
+	 		xfr_ptr->M4toM7[1] = Valores[0];
 	 	 	 xfr_ptr->sts_4to7 = 1;
 	 	 }
 
