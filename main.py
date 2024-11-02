@@ -1,10 +1,18 @@
 import time
 import socket
 import threading
+import struct
+import serial
+import numpy as np
 from proto.ssl_simulation_robot_control_pb2 import RobotControl
+
+CONV_GEAR = 1.25
+CONV_RAD_HZ = 1/(2*np.pi)
 
 RECEIVER_FPS = 3000  # Taxa de aquisição da rede dos pacotes do software
 CONTROL_FPS = 60  # Taxa de envio para o STM (Pode alterar aqui se necessário)
+SERIAL_PORT = '/dev/ttyACM0' # Conferir a USB utilizada
+SERIAL_BAUD_RATE = 115200
 
 # ---------------------------------------------------------------------------------------------
 #    DEFINIÇÃO DE CLASSES
@@ -141,8 +149,16 @@ class Receiver():
 receiver = Receiver(port=10330, logger=False)
 receiver.start_thread()
 
+# Declaração do objeto serial
+ser = serial.Serial()
+ser.baudrate = SERIAL_BAUD_RATE
+ser.port = SERIAL_PORT # Conferir a porta USB que será utilizada
+ser.open()
+
 while True:
     t1 = time.time()
+
+    #receiver.receive_socket()
     # Acesso das variáveis obtidas pela rede em cada um dos robôs [0, 1 e 2]
     for robot in receiver.robots:
         print("Robô ", robot.id_robot)
@@ -155,21 +171,21 @@ while True:
     # Elas possuem casos padrão para testes básicos de validação.
 
     # Robô 0 a 0.5m/s pra frente - descomentar as próximas 5 linhas
-    # robot0 = receiver.robots[0]
-    # robot0.wheel_velocity_front_right = 3.33333
-    # robot0.wheel_velocity_front_left = 3.33333
-    # robot0.wheel_velocity_back_right = 3.33333
-    # robot0.wheel_velocity_back_left = 3.33333
+    robot0 = receiver.robots[0]
+    #robot0.wheel_velocity_front_right = 0
+    #robot0.wheel_velocity_front_left = 0
+    # robot0.wheel_velocity_back_right = 0
+    #robot0.wheel_velocity_back_left = 0
 
     # Robô 1 a 0.5m/s pra cima - descomentar as próximas 5 linhas
-    # robot1 = receiver.robots[1]
+    robot1 = receiver.robots[1]
     # robot1.wheel_velocity_front_right = 9.25926
     # robot1.wheel_velocity_front_left = 9.259256
     # robot1.wheel_velocity_back_right = -13.09457
     # robot1.wheel_velocity_back_left = -13.09457
 
     # Robô 2 a 1 rad/s (apenas girando) - descomentar as próximas 5 linhas
-    # robot2 = receiver.robots[2]
+    robot2 = receiver.robots[2]
     # robot2.wheel_velocity_front_right = -16.03751
     # robot2.wheel_velocity_front_left = 16.03751
     # robot2.wheel_velocity_back_right = -13.09457
@@ -179,6 +195,31 @@ while True:
     # ---------------------------------------------------------------------------------------------
     #   ESCREVA SEU CÓDIGO AQUI, MESTRES DOS 10 PINOS
     # ---------------------------------------------------------------------------------------------
+
+    # Mensagem a ser enviada - Padrão 1
+    # Velocidades das rodas  (1,2,3,4) dos robos (1,2,3) (Roda 1 robo1, Roda 2 robo 1, Roda 3 Robo 1 ... )
+    # Padrão software: (1,2,3,4)
+    # Padrão Eletrônica: (4,3,2,1)
+
+    Rd = [int(robot0.wheel_velocity_front_left * CONV_GEAR*CONV_RAD_HZ*100),
+          int(robot0.wheel_velocity_back_left * CONV_GEAR*CONV_RAD_HZ*100),
+          int(robot0.wheel_velocity_back_right * CONV_GEAR*CONV_RAD_HZ*100),
+          int(robot0.wheel_velocity_front_right * CONV_GEAR*CONV_RAD_HZ*100),
+          int(robot1.wheel_velocity_front_left * CONV_GEAR*CONV_RAD_HZ*100),
+          int(robot1.wheel_velocity_back_left * CONV_GEAR*CONV_RAD_HZ*100),
+          int(robot1.wheel_velocity_back_right * CONV_GEAR*CONV_RAD_HZ*100),
+          int(robot1.wheel_velocity_front_right * CONV_GEAR*CONV_RAD_HZ*100),
+          int(robot2.wheel_velocity_front_left * CONV_GEAR*CONV_RAD_HZ*100),
+          int(robot2.wheel_velocity_back_left * CONV_GEAR*CONV_RAD_HZ*100),
+          int(robot2.wheel_velocity_back_right * CONV_GEAR*CONV_RAD_HZ*100),
+          int(robot2.wheel_velocity_front_right * CONV_GEAR*CONV_RAD_HZ*100),]
+    
+    Rd2 = struct.pack('i' * len(Rd), *Rd)  # 'i' para cada inteiro
+    ser.write(Rd2)
+    ser.flushInput()
+    var = (ser.readline()).decode("utf-8")
+    var = var.rstrip('\x00')
+    print(var) #Nesta variavel estara a string com as informações na ordem Corrente1,corrente2,corrente3,corrente4,lat1,lat2,lat3,lat4,packgeloss1 ...
 
     t2 = time.time()
 
