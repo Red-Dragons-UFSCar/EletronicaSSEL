@@ -814,18 +814,17 @@ int main(void)
  81008e0:	7c7b      	ldrb	r3, [r7, #17]
  81008e2:	2b00      	cmp	r3, #0
  81008e4:	d103      	bne.n	81008ee <main+0xc2>
-	  NRF_WriteRegisterByte(NRF_REG_RF_CH,0x02); // Canal 3
- 81008e6:	2102      	movs	r1, #2
+	  NRF_WriteRegisterByte(NRF_REG_RF_CH,0x04); // Canal 3
+ 81008e6:	2104      	movs	r1, #4
  81008e8:	2005      	movs	r0, #5
  81008ea:	f000 f973 	bl	8100bd4 <NRF_WriteRegisterByte>
-
   }
   if(PinState[0]==1){
  81008ee:	7c3b      	ldrb	r3, [r7, #16]
  81008f0:	2b01      	cmp	r3, #1
  81008f2:	d107      	bne.n	8100904 <main+0xd8>
-	  NRF_WriteRegisterByte(NRF_REG_RF_CH,0x03); // Canal 4
- 81008f4:	2103      	movs	r1, #3
+	  NRF_WriteRegisterByte(NRF_REG_RF_CH,0x02); // Canal 4
+ 81008f4:	2102      	movs	r1, #2
  81008f6:	2005      	movs	r0, #5
  81008f8:	f000 f96c 	bl	8100bd4 <NRF_WriteRegisterByte>
 	  HAL_GPIO_TogglePin(GPIOE, GPIO_PIN_0);
@@ -837,8 +836,8 @@ int main(void)
  8100904:	7c7b      	ldrb	r3, [r7, #17]
  8100906:	2b01      	cmp	r3, #1
  8100908:	d107      	bne.n	810091a <main+0xee>
-	  NRF_WriteRegisterByte(NRF_REG_RF_CH,0x04); //Canal 5
- 810090a:	2104      	movs	r1, #4
+	  NRF_WriteRegisterByte(NRF_REG_RF_CH,0x03); //Canal 5
+ 810090a:	2103      	movs	r1, #3
  810090c:	2005      	movs	r0, #5
  810090e:	f000 f961 	bl	8100bd4 <NRF_WriteRegisterByte>
 	  HAL_GPIO_TogglePin(GPIOE, GPIO_PIN_2);
@@ -846,6 +845,7 @@ int main(void)
  8100914:	481b      	ldr	r0, [pc, #108]	@ (8100984 <main+0x158>)
  8100916:	f001 f84a 	bl	81019ae <HAL_GPIO_TogglePin>
   }
+
   NRF_Status ret = NRF_OK;
  810091a:	2300      	movs	r3, #0
  810091c:	74fb      	strb	r3, [r7, #19]

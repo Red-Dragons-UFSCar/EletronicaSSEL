@@ -239,6 +239,7 @@ Error_Handler();
   float Leitura2 = 0;
   extern volatile float speed[4];
   extern volatile float uM[4];
+  extern volatile float error[4];
   while (1)
   {
 	      //comunicacao entre cores
@@ -256,7 +257,7 @@ Error_Handler();
 	  	  }
 
 	  	  for(uint8_t n=0; n<4;n++){
-	  		 ref[n] = old_mensagem[n+1]/10.0;
+	  		 ref[n] = (float)old_mensagem[n+1]/100;
 	  	  }
 
 
@@ -265,8 +266,8 @@ Error_Handler();
 	  		ref[n] =2;
 	  	}
 	  	   */
-	  	  //print para o putty
-	  	  sprintf(message, "%d a %d %d %d\n \r", new_mensagem[0], new_mensagem[1],new_mensagem[2], new_mensagem[3]);
+	  	  //print para o puttyW
+	  	  sprintf(message, "ref %f vel %f uM %f erro %f\n \r",ref[1], speed[1], uM[1],error[1]);
 	  	  CDC_Transmit_FS(message,sizeof(message));
 
 	  	  //Iniciar ADC

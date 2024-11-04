@@ -682,7 +682,8 @@ int main(void)
  81007c8:	2300      	movs	r3, #0
  81007ca:	f887 3076 	strb.w	r3, [r7, #118]	@ 0x76
  81007ce:	e015      	b.n	81007fc <main+0x10c>
-			 TxData[n+1] = Valores[n+i*4];
+
+				 TxData[n+1] = Valores[n+4*i];
  81007d0:	f897 2076 	ldrb.w	r2, [r7, #118]	@ 0x76
  81007d4:	f897 3077 	ldrb.w	r3, [r7, #119]	@ 0x77
  81007d8:	009b      	lsls	r3, r3, #2
@@ -702,7 +703,9 @@ int main(void)
  81007fc:	f897 3076 	ldrb.w	r3, [r7, #118]	@ 0x76
  8100800:	2b03      	cmp	r3, #3
  8100802:	d9e5      	bls.n	81007d0 <main+0xe0>
-		 }
+		}
+
+
 		 uint32_t Start = HAL_GetTick(); //Tempo de início de transmissão
  8100804:	f000 fe8c 	bl	8101520 <HAL_GetTick>
  8100808:	6738      	str	r0, [r7, #112]	@ 0x70
@@ -804,7 +807,6 @@ int main(void)
  81008de:	2b02      	cmp	r3, #2
  81008e0:	f67f af6d 	bls.w	81007be <main+0xce>
 	 }
-	//HAL_Delay(10);
 	 }
 	 if(xfr_ptr->sts_4to7 == 0){
  81008e4:	4b17      	ldr	r3, [pc, #92]	@ (8100944 <main+0x254>)

@@ -198,8 +198,8 @@ int main(void)
 		 changeChannel(i); //Troca o canal para o  do robo especifico
 		 //Salva a variável para envio em seu respectivo vetor
 		 for(uint8_t n=0; n<4;n++){
-			 TxData[n+1] = Valores[n+i*4];
-		 }
+			 TxData[n+1] = Valores[n+4*i];
+		}
 		 uint32_t Start = HAL_GetTick(); //Tempo de início de transmissão
 		 ret = NRF_TransmitAndWait(TxData, sizeof(TxData)); //Transmissão da mensagem
 		 uint32_t End = HAL_GetTick(); //Tempo de fim de transmissão
@@ -219,7 +219,6 @@ int main(void)
 	 } else {
 		 HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_0);
 	 }
-	//HAL_Delay(10);
 	 }
 	 if(xfr_ptr->sts_4to7 == 0){
 	 		 for(uint8_t n = 0 ;n<9;n++){

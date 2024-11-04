@@ -48,8 +48,8 @@
 //Referência de velocidade (Vindo da main)
 extern float ref[4];
 //Constantes de Controle
-static float Kc =25;
-static float Ki = 3 ;
+static float Kc =5;
+static float Ki = 1 ;
 static float Kd = 0;
 // Erro
 volatile float error[4] = {0,0,0,0};
@@ -103,10 +103,13 @@ void Controle(){
 		//Mapeamento da variavel de ação de controle no alcançe dado
 		if(ref[n]==0){
 			D[n]=0;
+			uM[n] = 0;
 		}else if(uM[n]>=0 ){
-			D[n] = map(uM[n],0,1023,0,1023);
+			D[n] = map(uM[n],0,1023,350,1023);
+
 		}else if(uM[n]<0){
-			D[n]= map(uM[n],-1023,0,2047,1023);
+			D[n]= map(uM[n],-1023,0,2047,1374);
+
 		}
 	}
 
@@ -397,10 +400,12 @@ void TIM15_IRQHandler(void)
   Enc[2] = TIM3->CNT;
   Enc[3] = TIM4->CNT;
   Enc[1] = TIM8->CNT;
+
   TIM4->CNT = 0;
   TIM1->CNT = 0;
   TIM8->CNT = 0;
   TIM3->CNT = 0;
+  static float last_vel[4] ={0,0,0,0};
 
   for(uint8_t i=0;i<4;i++){
 	  vel[i] = Enc[i];
@@ -408,8 +413,13 @@ void TIM15_IRQHandler(void)
 			  vel[i] = vel[i] - 65355;
 	  }
 	  speed[i] = -1*vel[i]/(163.84);
-	  velocidade[i] = speed[i];
+	  if(speed[i]>10 || speed[i]<-10){
+		  speed[i] = last_vel[i];
+	  } else{
+		  last_vel[i] = speed[i];
+	  }
   }
+
 
   //velocidade = speed[0];
   Controle();
