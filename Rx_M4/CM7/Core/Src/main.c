@@ -238,7 +238,7 @@ Error_Handler();
   uint32_t Leitura= 0;
   float Leitura2 = 0;
   extern volatile float speed[4];
-  extern volatile float uM[4];
+  extern volatile float u[4];
   extern volatile float error[4];
   while (1)
   {
@@ -267,7 +267,7 @@ Error_Handler();
 	  	}
 	  	   */
 	  	  //print para o puttyW
-	  	  sprintf(message, "ref %f vel %f uM %f erro %f\n \r",ref[1], speed[1], uM[1],error[1]);
+	  	  sprintf(message, "%f %f %f\n \r",ref[0],speed[0],u[0]);
 	  	  CDC_Transmit_FS(message,sizeof(message));
 
 	  	  //Iniciar ADC
@@ -280,7 +280,7 @@ Error_Handler();
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-	HAL_Delay(100);
+	HAL_Delay(5);
   }
   /* USER CODE END 3 */
 }

@@ -48,19 +48,19 @@
 //Referência de velocidade (Vindo da main)
 extern float ref[4];
 //Constantes de Controle
-static float Kc =5;
-static float Ki = 1 ;
-static float Kd = 0;
+const float Kc[4] ={150,150,150,150};
+const float Ki[4] = {400,400,400,400} ;
+const float Kd[4] = {0,0,0,0};
 // Erro
 volatile float error[4] = {0,0,0,0};
 //Varição da ação de controle
-volatile float deltaU[4] = {0,0,0,0};
+//volatile float deltaU[4] = {0,0,0,0};
 //Ação de Controle
-volatile float uM[4] = {0,0,0,0};
+//volatile float uM[4] = {0,0,0,0};
 //Velocidades e erros anteriores
-volatile float prevspeed[4]={0,0,0,0};
-volatile float prevspeed2[4] = {0,0,0,0};
-volatile float preverror[4]= {0,0,0,0};
+//volatile float prevspeed[4]={0,0,0,0};
+//volatile float prevspeed2[4] = {0,0,0,0};
+//volatile float preverror[4]= {0,0,0,0};
 //Contador para salvar as variaveis
 uint8_t cont = 0;
 //Valores de DSHOT enviado para os motores
@@ -69,6 +69,16 @@ uint16_t D[4]= {0,0,0,0};
 uint32_t Enc[4] = {0,0,0,0};
 volatile int vel[4] = {0,0,0,0};
 volatile float speed[4] = {0,0,0,0};
+
+//Novo controlador
+volatile float u[4] = {0,0,0,0};
+volatile float u_k1[4] = {0,0,0,0};
+volatile float preverror[4]= {0,0,0,0};
+volatile float preverror2[4] = {0,0,0,0};
+float q0[4] = {0,0,0,0};
+float q1[4] = {0,0,0,0};
+float q2[4] = {0,0,0,0};
+uint8_t once =0;
 
 /* USER CODE END PV */
 
@@ -87,31 +97,37 @@ uint16_t map(float x, int in_min, int in_max, int out_min, int out_max) {
 
 void Controle(){
 	for(uint8_t n=0;n<4;n++){
+		if(once ==0){
+			q0[n] = Kc[n] + Kd[n]/0.01 +ki[n]*0.01;
+			q1[n] = -Kc[n] - 2*Kd[n]/0.01;
+			q2[n] = Kd[n]/0.01;
+		}
 		//Calculo de erro
 		error[n] =ref[n] -  speed[n];
 		//Variação da ação de controle para esta iteração
-		deltaU[n] = Kc*(error[n]- preverror[n]) + error[n]*Ki -Kd*(speed[n]-2*prevspeed[n] + prevspeed2[n]);
+		//deltaU[n] = Kc*(error[n]- preverror[n]) + error[n]*Ki -Kd*(speed[n]-2*prevspeed[n] + prevspeed2[n]);
+		u[n] = u_k1[n] + q0[n]*error[n] +q1[n]*preverror[n] +q2[n]*preverror2[n];
 		//Ação de controle
-		uM[n] = uM[n] + deltaU[n];
+		//uM[n] = uM[n] + deltaU[n];
+
 		//Saturado para evitar que a ação de controle ultrapasse o limite
-		if( uM[n] < -1023){
-			uM[n]= -1023;
+		if( u[n] < -1023){
+			u[n]= -1023;
 		}
-		if(uM[n]>1023){
-			uM[n]= 1023;
+		if(u[n]>1023){
+			u[n]= 1023;
 		}
 		//Mapeamento da variavel de ação de controle no alcançe dado
 		if(ref[n]==0){
 			D[n]=0;
-			uM[n] = 0;
-		}else if(uM[n]>=0 ){
-			D[n] = map(uM[n],0,1023,350,1023);
+			u[n] = 0;
+		}else if(u[n]>=0 ){
+			D[n] = map(u[n],0,1023,0,1023);
 
-		}else if(uM[n]<0){
-			D[n]= map(uM[n],-1023,0,2047,1374);
-
+		}else if(u[n]<0){
+			D[n]= map(u[n],-1023,0,2047,1024);
 		}
-	}
+		u_k1[n] = u[n];
 
 	//Logica para salvar o erro e a velocidade anterior
 	cont = cont +1;
@@ -128,6 +144,8 @@ void Controle(){
 		}
 		cont = 1;
 	}
+}
+	once=1;
 }
 /* USER CODE END 0 */
 
