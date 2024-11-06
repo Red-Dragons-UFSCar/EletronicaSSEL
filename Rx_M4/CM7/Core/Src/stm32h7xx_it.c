@@ -98,7 +98,7 @@ uint16_t map(float x, int in_min, int in_max, int out_min, int out_max) {
 void Controle(){
 	for(uint8_t n=0;n<4;n++){
 		if(once ==0){
-			q0[n] = Kc[n] + Kd[n]/0.01 +ki[n]*0.01;
+			q0[n] = Kc[n] + Kd[n]/0.01 +Ki[n]*0.01;
 			q1[n] = -Kc[n] - 2*Kd[n]/0.01;
 			q2[n] = Kd[n]/0.01;
 		}
@@ -133,13 +133,14 @@ void Controle(){
 	cont = cont +1;
 	if(cont == 1){
 		for(uint8_t n=0;n<4;n++){
-			prevspeed[n] = speed[n];
+			//prevspeed[n] = speed[n];
 			preverror[n] = error[n];
 		}
 	} else if(cont ==2){
 		for(uint8_t n=0;n<4;n++){
-			prevspeed2[n] = prevspeed[n];
-			prevspeed[n] = speed[n];
+			//prevspeed2[n] = prevspeed[n];
+			preverror2[n] = preverror[n];
+			//prevspeed[n] = speed[n];
 			preverror[n] = error[n];
 		}
 		cont = 1;
