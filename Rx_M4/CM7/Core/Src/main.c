@@ -240,8 +240,10 @@ Error_Handler();
   extern volatile float speed[4];
   extern volatile float u[4];
   extern volatile float error[4];
+  uint32_t contador = 0;
   while (1)
   {
+
 	      //comunicacao entre cores
 	  	  if (xfr_ptr->sts_4to7 == 1)
 	  	  {
@@ -267,7 +269,7 @@ Error_Handler();
 	  	}
 	  	   */
 	  	  //print para o puttyW
-	  	  sprintf(message, "%f %f %f\n \r",ref[0],speed[0],u[0]);
+	  	  sprintf(message, "%f %f %f %f\n \r",speed[0],speed[1],speed[2],speed[3]);
 	  	  CDC_Transmit_FS(message,sizeof(message));
 
 	  	  //Iniciar ADC
@@ -280,6 +282,8 @@ Error_Handler();
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+
+	contador++;
 	HAL_Delay(5);
   }
   /* USER CODE END 3 */

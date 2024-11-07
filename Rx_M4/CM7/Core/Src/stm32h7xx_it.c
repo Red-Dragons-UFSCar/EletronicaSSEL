@@ -48,9 +48,14 @@
 //Referência de velocidade (Vindo da main)
 extern float ref[4];
 //Constantes de Controle
-const float Kc[4] ={150,150,150,150};
-const float Ki[4] = {400,400,400,400} ;
-const float Kd[4] = {0,0,0,0};
+//Controlador B para frente
+const float Kc[4] ={125,125,150,125};
+const float Ki[4] = {600,600,700,600} ;
+const float Kd[4] = {0,0,0.005,0};
+//Controlador B para tras
+const float Kc_t[4] ={125,125,150,125};
+const float Ki_t[4] = {600,600,700,600} ;
+const float Kd_t[4] = {0,0,0.001,0.005};
 // Erro
 volatile float error[4] = {0,0,0,0};
 //Varição da ação de controle
@@ -78,6 +83,9 @@ volatile float preverror2[4] = {0,0,0,0};
 float q0[4] = {0,0,0,0};
 float q1[4] = {0,0,0,0};
 float q2[4] = {0,0,0,0};
+float q0_t[4] = {0,0,0,0};
+float q1_t[4] = {0,0,0,0};
+float q2_t[4] = {0,0,0,0};
 uint8_t once =0;
 
 /* USER CODE END PV */
@@ -101,12 +109,19 @@ void Controle(){
 			q0[n] = Kc[n] + Kd[n]/0.01 +Ki[n]*0.01;
 			q1[n] = -Kc[n] - 2*Kd[n]/0.01;
 			q2[n] = Kd[n]/0.01;
+			q0_t[n] = Kc_t[n] + Kd_t[n]/0.01 +Ki_t[n]*0.01;
+			q1_t[n] = -Kc_t[n] - 2*Kd_t[n]/0.01;
+			q2_t[n] = Kd_t[n]/0.01;
 		}
 		//Calculo de erro
 		error[n] =ref[n] -  speed[n];
 		//Variação da ação de controle para esta iteração
 		//deltaU[n] = Kc*(error[n]- preverror[n]) + error[n]*Ki -Kd*(speed[n]-2*prevspeed[n] + prevspeed2[n]);
-		u[n] = u_k1[n] + q0[n]*error[n] +q1[n]*preverror[n] +q2[n]*preverror2[n];
+		if(ref>0){
+			u[n] = u_k1[n] + q0[n]*error[n] +q1[n]*preverror[n] +q2[n]*preverror2[n];
+		} else {
+			u[n] = u_k1[n] + q0_t[n]*error[n] +q1_t[n]*preverror[n] +q2_t[n]*preverror2[n];
+		}
 		//Ação de controle
 		//uM[n] = uM[n] + deltaU[n];
 
@@ -121,9 +136,9 @@ void Controle(){
 		if(ref[n]==0){
 			D[n]=0;
 			u[n] = 0;
+			u_k1[n] = 0;
 		}else if(u[n]>=0 ){
 			D[n] = map(u[n],0,1023,0,1023);
-
 		}else if(u[n]<0){
 			D[n]= map(u[n],-1023,0,2047,1024);
 		}

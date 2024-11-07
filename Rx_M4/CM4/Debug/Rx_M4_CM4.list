@@ -866,7 +866,6 @@ int main(void)
  8100930:	2101      	movs	r1, #1
  8100932:	4816      	ldr	r0, [pc, #88]	@ (810098c <main+0x160>)
  8100934:	f001 f83b 	bl	81019ae <HAL_GPIO_TogglePin>
-
 	 }
 	 if(xfr_ptr->sts_4to7 == 0){
  8100938:	4b15      	ldr	r3, [pc, #84]	@ (8100990 <main+0x164>)

@@ -192,7 +192,6 @@ int main(void)
 	 ret = ReceiveData(RxData, sizeof(RxData));
 	 if(ret == NRF_OK){
 		 HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_0);
-
 	 }
 	 if(xfr_ptr->sts_4to7 == 0){
 		 for(int n = 0; n < 6; n++){
@@ -200,8 +199,6 @@ int main(void)
 		 	}
 		 xfr_ptr->sts_4to7 =1;
 	 }
-
-
 
     /* USER CODE END WHILE */
 
