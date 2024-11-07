@@ -51,11 +51,11 @@ extern float ref[4];
 //Controlador B para frente
 const float Kc[4] ={125,125,150,125};
 const float Ki[4] = {600,600,700,600} ;
-const float Kd[4] = {0,0,0.005,0};
+const float Kd[4] = {0,0,0,0};
 //Controlador B para tras
 const float Kc_t[4] ={125,125,150,125};
 const float Ki_t[4] = {600,600,700,600} ;
-const float Kd_t[4] = {0,0,0.001,0.005};
+const float Kd_t[4] = {0,0,0,0};
 // Erro
 volatile float error[4] = {0,0,0,0};
 //Varição da ação de controle
@@ -72,7 +72,7 @@ uint8_t cont = 0;
 uint16_t D[4]= {0,0,0,0};
 //Variavejs de valor de encoder e calculo de velocidade
 uint32_t Enc[4] = {0,0,0,0};
-volatile int vel[4] = {0,0,0,0};
+volatile float vel[4] = {0,0,0,0};
 volatile float speed[4] = {0,0,0,0};
 
 //Novo controlador
@@ -163,6 +163,18 @@ void Controle(){
 }
 	once=1;
 }
+
+float low_pass(float reading){
+	static float  last_reading = 0;
+	static float  last_value =0;
+	static float  result =0;
+	result = -0.65*last_value + reading*0.825 +  last_reading*0.825;
+	last_reading = reading;
+	last_value = result;
+	return result;
+
+}
+
 /* USER CODE END 0 */
 
 /* External variables --------------------------------------------------------*/
@@ -439,7 +451,7 @@ void TIM15_IRQHandler(void)
   TIM1->CNT = 0;
   TIM8->CNT = 0;
   TIM3->CNT = 0;
-  static float last_vel[4] ={0,0,0,0};
+
 
   for(uint8_t i=0;i<4;i++){
 	  vel[i] = Enc[i];
@@ -447,11 +459,8 @@ void TIM15_IRQHandler(void)
 			  vel[i] = vel[i] - 65355;
 	  }
 	  speed[i] = -1*vel[i]/(163.84);
-	  if(speed[i]>10 || speed[i]<-10){
-		  speed[i] = last_vel[i];
-	  } else{
-		  last_vel[i] = speed[i];
-	  }
+	  speed[i] = low_pass(speed[i]);
+	  vel[i] = speed[i];
   }
 
 

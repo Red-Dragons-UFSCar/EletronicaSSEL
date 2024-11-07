@@ -194,7 +194,6 @@ Error_Handler();
   HAL_TIM_Encoder_Start_IT(&htim1, TIM_CHANNEL_ALL);
   HAL_TIM_Encoder_Start_IT(&htim8, TIM_CHANNEL_ALL);
   HAL_TIM_Encoder_Start_IT(&htim3, TIM_CHANNEL_ALL);
-	uint8_t * xfr_data; // pointer to transfer data
 
 
 	//initialize inter-core status pointers
@@ -237,7 +236,7 @@ Error_Handler();
 
   uint32_t Leitura= 0;
   float Leitura2 = 0;
-  extern volatile float speed[4];
+  extern volatile float vel[4];
   extern volatile float u[4];
   extern volatile float error[4];
   uint32_t contador = 0;
@@ -269,7 +268,7 @@ Error_Handler();
 	  	}
 	  	   */
 	  	  //print para o puttyW
-	  	  sprintf(message, "%f %f %f %f\n \r",speed[0],speed[1],speed[2],speed[3]);
+	  	  sprintf(message, "%f %f %f %f\n \r",vel[0],vel[1],vel[2],vel[3]);
 	  	  CDC_Transmit_FS(message,sizeof(message));
 
 	  	  //Iniciar ADC
