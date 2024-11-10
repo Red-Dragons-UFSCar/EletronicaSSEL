@@ -49,12 +49,22 @@
 extern float ref[4];
 //Constantes de Controle
 //Controlador B para frente
-const float Kc[4] ={125,125,150,125};
-const float Ki[4] = {600,600,700,600} ;
+/*
+const float Kc[4] ={120,80,130,125};
+const float Ki[4] = {600,600,675,600} ;
 const float Kd[4] = {0,0,0,0};
 //Controlador B para tras
-const float Kc_t[4] ={125,125,150,125};
-const float Ki_t[4] = {600,600,700,600} ;
+const float Kc_t[4] ={120,80,130,125};
+const float Ki_t[4] = {600,600,675,600} ;
+const float Kd_t[4] = {0,0,0,0};
+*/
+//Controlador A para frente
+const float Kc[4] ={120,80,130,125};
+const float Ki[4] = {600,600,675,600} ;
+const float Kd[4] = {0,0,0,0};
+//Controlador A para tras
+const float Kc_t[4] ={120,80,130,125};
+const float Ki_t[4] = {600,600,675,600} ;
 const float Kd_t[4] = {0,0,0,0};
 // Erro
 volatile float error[4] = {0,0,0,0};
@@ -167,9 +177,13 @@ void Controle(){
 float low_pass(float reading){
 	static float  last_reading = 0;
 	static float  last_value =0;
+	static float  last_value_2 =0;
 	static float  result =0;
-	result = -0.65*last_value + reading*0.825 +  last_reading*0.825;
+	static float last_reading_2 = 0;
+	result = -2*last_value - 1*last_value_2 + reading*1 +  last_reading*2 + 1*last_reading_2;
+	last_reading_2 = last_reading;
 	last_reading = reading;
+	last_value_2 = last_value;
 	last_value = result;
 	return result;
 

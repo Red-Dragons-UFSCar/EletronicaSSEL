@@ -249,7 +249,7 @@ Error_Handler();
 	  		 get_M4(new_mensagem); // get data sent from M4 to M7
 	  	  }
 
-	  	  //validacao da mensagem, utilizamos 111 como um ID de inicio e 112 de final
+		  //validacao da mensagem, utilizamos 111 como um ID de inicio e 112 de final
 
 	  	  if((new_mensagem[0]==111)&&(new_mensagem[5]==112)){
 	  		for(uint8_t n=0;n<6;n++){
@@ -258,7 +258,14 @@ Error_Handler();
 	  	  }
 
 	  	  for(uint8_t n=0; n<4;n++){
-	  		 ref[n] = (float)old_mensagem[n+1]/100;
+	  		 //ref[n] = (float)old_mensagem[n+1]/100;
+
+	  		  if(contador<400){
+	  			ref[n] =0;
+	  		  } else {
+	  			  ref[n] = -4;
+	  		  }
+
 	  	  }
 
 

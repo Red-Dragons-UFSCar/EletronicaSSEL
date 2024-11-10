@@ -18,12 +18,10 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-#include "usb_device.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "nrf24l01.h"
-#include "usbd_cdc_if.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -34,7 +32,7 @@
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
 uint8_t TxAdress0[] = {1,2,3,4,5};
-
+int Valores[12] = {0,0,0,0,0,0,0,0,0,0,0,0};
 
 int TxData[6]={111,0,0,0,0,112};
 uint8_t RxData[1];
@@ -49,6 +47,8 @@ uint8_t ReadMemManco = 0;
 /* Private variables ---------------------------------------------------------*/
 SPI_HandleTypeDef hspi1;
 
+UART_HandleTypeDef huart1;
+
 /* USER CODE BEGIN PV */
 
 /* USER CODE END PV */
@@ -57,6 +57,7 @@ SPI_HandleTypeDef hspi1;
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_SPI1_Init(void);
+static void MX_USART1_UART_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -78,13 +79,13 @@ void Tx_mode(uint8_t Adress[5]){
 void changeChannel(uint8_t n){
 	NRF_EnterMode(NRF_MODE_STANDBY1);
 	if(n==0){
-		NRF_WriteRegisterByte(NRF_REG_RF_CH,0x02); //Canal 3
+		NRF_WriteRegisterByte(NRF_REG_RF_CH,0x4); //Canal 3
 	}
 	if(n==1){
-		NRF_WriteRegisterByte(NRF_REG_RF_CH,0x03); //Canal 4
+		NRF_WriteRegisterByte(NRF_REG_RF_CH,0x3); //Canal 4
 	}
 	if(n==2){
-		NRF_WriteRegisterByte(NRF_REG_RF_CH,0x04); //Canal 5
+		NRF_WriteRegisterByte(NRF_REG_RF_CH,0x2); //Canal 5
 	}
 	NRF_EnterMode(NRF_MODE_TX);
 }
@@ -133,7 +134,7 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_SPI1_Init();
-  MX_USB_DEVICE_Init();
+  MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
   Tx_mode(TxAdress0);
 
@@ -144,11 +145,21 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   int Valores[12] = {0,0,0,0,0,0,0,0,0,0,0,0};
   int Returns[9]={0,0,0,0,0,0,0,0,0};
-  uint32_t acumulador[3] = {1,1,1};
+  uint32_t acumulador[3] = {0,0,0};
   char message[100] = {'\0'};
-
+  HAL_StatusTypeDef ret_uart = HAL_TIMEOUT;
   while (1)
   {
+	  	  //CDC_Receive_FS(Valores,sizeof(Valores));
+	  	  HAL_UART_Receive_IT(&huart1,Valores,sizeof(Valores));
+	  	  HAL_Delay(10);
+	  	  sprintf(message, "%d %d %d %d %d %d %d %d %d\n\r",Valores[0],Valores[1],Valores[2],Returns[3],Returns[4],Returns[5],Returns[6],Returns[7],Returns[8],Returns[9]);
+	  	  HAL_UART_Transmit_IT(&huart1,message,sizeof(message));
+
+
+			//CDC_Transmit_FS(message,sizeof(message));
+
+			HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
 	 	 	//Loop entre Robos
 	 	 	 for(uint8_t i=0; i<3;i++){
 	 	 		 changeChannel(i); //Troca o canal para o  do robo especifico
@@ -166,24 +177,22 @@ int main(void)
 	 	 		 Returns[i+3] = acumulador[i];
 	 	 		 if(ret == NRF_OK){
 	 	 			 //Pino de confirmação
-	 	 			 HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_14);
+	 	 			 //HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_14);
 	 	 			 int retorno = 0;
 	 	 			 Returns[i] = retorno;
 	 	 			 Returns[i+6] = ploss;
 	 	 			 acumulador[i] = 0;
 	 	 		 } else if(ret == NRF_MAX_RT) {
-	 	 			 HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
+	 	 			 //HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
 
 	 	 		 } else {
 	 	 			 //HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_0);
 	 	 		 }
 	 	 	 }
 
-	 	 	CDC_Receive_FS(Valores,sizeof(Valores));
-	 	 	sprintf(message, "oi %d %d %d %d %d %d %d %d %d\n",Valores[0],Returns[1],Returns[2],Returns[3],Returns[4],Returns[5],Returns[6],Returns[7],Returns[8],Returns[9]);
-	 	 	CDC_Transmit_FS(message,sizeof(message));
 
-	 	 	HAL_Delay(1);
+
+	 	 	//HAL_Delay(1);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -199,7 +208,6 @@ void SystemClock_Config(void)
 {
   RCC_OscInitTypeDef RCC_OscInitStruct = {0};
   RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
-  RCC_PeriphCLKInitTypeDef PeriphClkInit = {0};
 
   /** Initializes the RCC Oscillators according to the specified parameters
   * in the RCC_OscInitTypeDef structure.
@@ -210,7 +218,7 @@ void SystemClock_Config(void)
   RCC_OscInitStruct.HSIState = RCC_HSI_ON;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
-  RCC_OscInitStruct.PLL.PLLMUL = RCC_PLL_MUL6;
+  RCC_OscInitStruct.PLL.PLLMUL = RCC_PLL_MUL9;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
   {
     Error_Handler();
@@ -223,15 +231,9 @@ void SystemClock_Config(void)
   RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
   RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
   RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV2;
-  RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
+  RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV4;
 
-  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_1) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_USB;
-  PeriphClkInit.UsbClockSelection = RCC_USBCLKSOURCE_PLL;
-  if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit) != HAL_OK)
+  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_2) != HAL_OK)
   {
     Error_Handler();
   }
@@ -272,6 +274,39 @@ static void MX_SPI1_Init(void)
   /* USER CODE BEGIN SPI1_Init 2 */
 
   /* USER CODE END SPI1_Init 2 */
+
+}
+
+/**
+  * @brief USART1 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_USART1_UART_Init(void)
+{
+
+  /* USER CODE BEGIN USART1_Init 0 */
+
+  /* USER CODE END USART1_Init 0 */
+
+  /* USER CODE BEGIN USART1_Init 1 */
+
+  /* USER CODE END USART1_Init 1 */
+  huart1.Instance = USART1;
+  huart1.Init.BaudRate = 115200;
+  huart1.Init.WordLength = UART_WORDLENGTH_8B;
+  huart1.Init.StopBits = UART_STOPBITS_1;
+  huart1.Init.Parity = UART_PARITY_NONE;
+  huart1.Init.Mode = UART_MODE_TX_RX;
+  huart1.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+  huart1.Init.OverSampling = UART_OVERSAMPLING_16;
+  if (HAL_UART_Init(&huart1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN USART1_Init 2 */
+
+  /* USER CODE END USART1_Init 2 */
 
 }
 
