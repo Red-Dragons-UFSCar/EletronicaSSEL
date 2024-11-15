@@ -43,10 +43,14 @@
 
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN PV */
-//Controlador
+
+/*
+ * CONTROLADOR
+ */
 
 //Referência de velocidade (Vindo da main)
 extern float ref[4];
+
 //Constantes de Controle
 //Controlador B para frente
 /*
@@ -58,45 +62,42 @@ const float Kc_t[4] ={120,80,130,125};
 const float Ki_t[4] = {600,600,675,600} ;
 const float Kd_t[4] = {0,0,0,0};
 */
+
 //Controlador A para frente
 const float Kc[4] ={120,80,130,125};
 const float Ki[4] = {600,600,675,600} ;
 const float Kd[4] = {0,0,0,0};
+
 //Controlador A para tras
 const float Kc_t[4] ={120,80,130,125};
 const float Ki_t[4] = {600,600,675,600} ;
 const float Kd_t[4] = {0,0,0,0};
-// Erro
-volatile float error[4] = {0,0,0,0};
-//Varição da ação de controle
-//volatile float deltaU[4] = {0,0,0,0};
-//Ação de Controle
-//volatile float uM[4] = {0,0,0,0};
-//Velocidades e erros anteriores
-//volatile float prevspeed[4]={0,0,0,0};
-//volatile float prevspeed2[4] = {0,0,0,0};
-//volatile float preverror[4]= {0,0,0,0};
-//Contador para salvar as variaveis
-uint8_t cont = 0;
-//Valores de DSHOT enviado para os motores
-uint16_t D[4]= {0,0,0,0};
-//Variavejs de valor de encoder e calculo de velocidade
-uint32_t Enc[4] = {0,0,0,0};
-volatile float vel[4] = {0,0,0,0};
-volatile float speed[4] = {0,0,0,0};
 
-//Novo controlador
-volatile float u[4] = {0,0,0,0};
-volatile float u_k1[4] = {0,0,0,0};
-volatile float preverror[4]= {0,0,0,0};
-volatile float preverror2[4] = {0,0,0,0};
+//Variaveis de controlador discreto
 float q0[4] = {0,0,0,0};
 float q1[4] = {0,0,0,0};
 float q2[4] = {0,0,0,0};
 float q0_t[4] = {0,0,0,0};
 float q1_t[4] = {0,0,0,0};
 float q2_t[4] = {0,0,0,0};
-uint8_t once =0;
+uint8_t once =0; //Variavel para calcular qs apenas uma ves
+
+//Variaveis de controle
+volatile float u[4] = {0,0,0,0}; //Ação de controle
+volatile float u_k1[4] = {0,0,0,0}; //Ação de controle da iteração anterior
+
+// Erro
+volatile float error[4] = {0,0,0,0};
+volatile float preverror[4]= {0,0,0,0};
+volatile float preverror2[4] = {0,0,0,0};
+
+//Valores de DSHOT enviado para os motores
+uint16_t D[4]= {0,0,0,0};
+//Variavejs de calculo de velocidade angular do motor
+uint32_t Enc[4] = {0,0,0,0};
+volatile float vel[4] = {0,0,0,0};
+volatile float speed[4] = {0,0,0,0};
+
 
 /* USER CODE END PV */
 
@@ -113,8 +114,9 @@ uint16_t map(float x, int in_min, int in_max, int out_min, int out_max) {
   return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 }
 
-void Controle(){
+void Controle(){ //Verificar possibilidade de uso de parâmetros para função controle
 	for(uint8_t n=0;n<4;n++){
+		//Calculo de qs em controlador discreto
 		if(once ==0){
 			q0[n] = Kc[n] + Kd[n]/0.01 +Ki[n]*0.01;
 			q1[n] = -Kc[n] - 2*Kd[n]/0.01;
@@ -123,17 +125,14 @@ void Controle(){
 			q1_t[n] = -Kc_t[n] - 2*Kd_t[n]/0.01;
 			q2_t[n] = Kd_t[n]/0.01;
 		}
-		//Calculo de erro
-		error[n] =ref[n] -  speed[n];
-		//Variação da ação de controle para esta iteração
-		//deltaU[n] = Kc*(error[n]- preverror[n]) + error[n]*Ki -Kd*(speed[n]-2*prevspeed[n] + prevspeed2[n]);
+
+		error[n] =ref[n] -  speed[n]; //Calculo de erro
+
 		if(ref>0){
-			u[n] = u_k1[n] + q0[n]*error[n] +q1[n]*preverror[n] +q2[n]*preverror2[n];
+			u[n] = u_k1[n] + q0[n]*error[n] +q1[n]*preverror[n] +q2[n]*preverror2[n]; //Ação de controle
 		} else {
-			u[n] = u_k1[n] + q0_t[n]*error[n] +q1_t[n]*preverror[n] +q2_t[n]*preverror2[n];
+			u[n] = u_k1[n] + q0_t[n]*error[n] +q1_t[n]*preverror[n] +q2_t[n]*preverror2[n]; // Ação de controle para tras
 		}
-		//Ação de controle
-		//uM[n] = uM[n] + deltaU[n];
 
 		//Saturado para evitar que a ação de controle ultrapasse o limite
 		if( u[n] < -1023){
@@ -148,32 +147,37 @@ void Controle(){
 			u[n] = 0;
 			u_k1[n] = 0;
 		}else if(u[n]>=0 ){
-			D[n] = map(u[n],0,1023,0,1023);
+			D[n] = map(u[n],0,1023,150,1023);
+			/*
+			malha aberta
+			if(n== rodamerda){
+				D[n] = map(ref[n],0,11,valor_min,valor_max);
+			} else {
+				D[n] = map(u[n],0,1023,0,1023)
+			}
+			*/
 		}else if(u[n]<0){
-			D[n]= map(u[n],-1023,0,2047,1024);
+			D[n]= map(u[n],-1023,0,2047,1174);
+			/*
+			malha aberta
+			if(n== rodamerda){
+				D[n] = map(ref[n],-11,0,valor_max,valor_min);
+			} else {
+				D[n] = map(u[n],0,1023,2047,1024)
+			}
+			*/
 		}
-		u_k1[n] = u[n];
+
+		u_k1[n] = u[n]; //Salvamento da iteração anterior
 
 	//Logica para salvar o erro e a velocidade anterior
-	cont = cont +1;
-	if(cont == 1){
-		for(uint8_t n=0;n<4;n++){
-			//prevspeed[n] = speed[n];
-			preverror[n] = error[n];
-		}
-	} else if(cont ==2){
-		for(uint8_t n=0;n<4;n++){
-			//prevspeed2[n] = prevspeed[n];
-			preverror2[n] = preverror[n];
-			//prevspeed[n] = speed[n];
-			preverror[n] = error[n];
-		}
-		cont = 1;
+	preverror[n] = error[n];
+	preverror2[n] = preverror[n];
 	}
-}
 	once=1;
 }
 
+//Filtro butterworth passa baixa paa leitura
 float low_pass(float reading){
 	static float  last_reading = 0;
 	static float  last_value =0;
@@ -204,7 +208,7 @@ extern TIM_HandleTypeDef htim4;
 extern TIM_HandleTypeDef htim3;
 extern TIM_HandleTypeDef htim1;
 extern TIM_HandleTypeDef htim8;
-extern float velocidade[4];
+
 /* USER CODE END EV */
 
 /******************************************************************************/
@@ -453,37 +457,37 @@ void TIM15_IRQHandler(void)
   /* USER CODE END TIM15_IRQn 0 */
   HAL_TIM_IRQHandler(&htim15);
   /* USER CODE BEGIN TIM15_IRQn 1 */
-  //
-  //Enc[0] = TIM4->CNT;
+
+  //Leituras de encoder
   Enc[0] = TIM1->CNT;
-  //Enc[1] = TIM1->CNT;
   Enc[2] = TIM3->CNT;
   Enc[3] = TIM4->CNT;
   Enc[1] = TIM8->CNT;
-
+  //Zerando leitura de encoders para próxima iteração
   TIM4->CNT = 0;
   TIM1->CNT = 0;
   TIM8->CNT = 0;
   TIM3->CNT = 0;
 
-
+  //Cálculo de velocidade das rodas
   for(uint8_t i=0;i<4;i++){
 	  vel[i] = Enc[i];
+
+	  //Lógica para troca de direção
 	  if(vel[i]>60000){
 			  vel[i] = vel[i] - 65355;
 	  }
-	  speed[i] = -1*vel[i]/(163.84);
-	  speed[i] = low_pass(speed[i]);
-	  vel[i] = speed[i];
+
+	  speed[i] = -1*vel[i]/(163.84); // (n_pulsos)/(n_pulsos_revolução * tempo_amostr) = voltas/s
+	  speed[i] = low_pass(speed[i]); //Filtro passa baixa na leitura
+	  vel[i] = speed[i]; //Salvamento de variável para leitura no serial
   }
 
+  Controle();//Execução do controlador
 
-  //velocidade = speed[0];
-  Controle();
+  dshot_write(D); //Execução da variável no ESC
 
-  dshot_write(D);
-
-  HAL_GPIO_TogglePin(GPIOB,GPIO_PIN_14);
+  HAL_GPIO_TogglePin(GPIOB,GPIO_PIN_14); //LED para debug de interrupção
   /* USER CODE END TIM15_IRQn 1 */
 }
 

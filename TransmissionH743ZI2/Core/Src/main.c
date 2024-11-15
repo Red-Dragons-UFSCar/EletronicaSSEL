@@ -60,14 +60,18 @@ static void MX_SPI1_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-
-//variaveis globais
-uint8_t TxAdress0[] = {1,2,3,4,5};
-int TxData[6]={111,0,0,0,0,112};
-uint8_t RxData[1];
-uint8_t ReadMemManco = 0;
+uint8_t TxAdress0[] = {1,2,3,4,5}; // Endereços de envio
+int TxData[6]={111,0,0,0,0,112}; //Dados a serem transferidos
+uint8_t RxData[1];//Dados a serem recebidos(Descontinuar)
+int vet_senhas[6]= {111,112,113,114,115,116}; //Vetor de senhas dos robos
 
 //inicializar modo de transmissao
+
+/*
+ * Troca de modo do NRF24L01 para modo de transmissão
+ * Parâmetros:
+ * Endereço de transmissão
+ */
 void Tx_mode(uint8_t Adress[5]){
 
 	if(NRF_Init(&hspi1, GPIOG, GPIO_PIN_12, GPIOG, GPIO_PIN_14) != NRF_OK){
@@ -80,22 +84,30 @@ void Tx_mode(uint8_t Adress[5]){
 	NRF_WriteRegister(NRF_REG_RX_ADDR_P0, Adress, 5);
 }
 
-//mudanca de canal
+/*
+ * Função para mudar o canal de comunicação
+ * Parâmetros: Robô alvo
+ */
 void changeChannel(uint8_t n){
 	NRF_EnterMode(NRF_MODE_STANDBY1);
 	if(n==0){
-		NRF_WriteRegisterByte(NRF_REG_RF_CH,0x02); //Canal 3
+		NRF_WriteRegisterByte(NRF_REG_RF_CH,0x03); //Canal 3
 	}
 	if(n==1){
-		NRF_WriteRegisterByte(NRF_REG_RF_CH,0x03); //Canal 4
+		NRF_WriteRegisterByte(NRF_REG_RF_CH,0x05); //Canal 4
 	}
 	if(n==2){
-		NRF_WriteRegisterByte(NRF_REG_RF_CH,0x04); //Canal 5
+		NRF_WriteRegisterByte(NRF_REG_RF_CH,0x07); //Canal 5
 	}
 	NRF_EnterMode(NRF_MODE_TX);
 }
 
-//receber dados
+/*
+ * Função para precebimento de dados
+ * Parâmetros:
+ * Ponteiro para variavel on serão salvo os dados
+ * Tamanho em bytes dos dados
+ */
 NRF_Status ReceiveData (uint8_t *data, uint32_t len){
 	NRF_Status ret = NRF_ERROR;
 	uint8_t status = NRF_ReadStatus();
@@ -147,54 +159,60 @@ int main(void)
   MX_USB_DEVICE_Init();
   MX_SPI1_Init();
   /* USER CODE BEGIN 2 */
-  Tx_mode(TxAdress0);
+  Tx_mode(TxAdress0); //Inicializar NRF em modo Transmissão com endereço
 
   NRF_Status ret = NRF_OK;
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+  //Vetor de caracteres para utilizar no serial (com objetivo de obtenção de dados dos motores)
   char message[100] = {'\0'};
-  //int Retorno[9] = {0,0,0,0,0,0,0,0,0};//Correntes (3 robos), Latência (3 Robos), Perda de Pacote (3 Robos)
-  //int Software[12] = {0,0,0,0,0,0,0,0,0,0,0,0}; //((vel)*4Rodas)*3Robos
 
-  int Valores[12] = {0,0,0,0,0,0,0,0,0,0,0,0};//((vel)*4Rodas)*3Robos
-  int Returns[9]={0,0,0,0,0,0,0,0,0}; //Correntes (3 robos), Latência (3 Robos), Perda de Pacote (3 Robos)
-  uint32_t acumulador[3] = {1,1,1}; //usado para calculo de frequencia
-
+  int Valores[12] = {0,0,0,0,0,0,0,0,0,0,0,0};//Vator de recebimento do python ((vel)*4Rodas)*3Robos
+  int Returns[9]={0,0,0,0,0,0,0,0,0}; //Vetor para retorno para o python
+  uint32_t acumulador[3] = {0,0,0}; //utilizado para o calculo de latência
   while (1)
   {
+	  /*
+	   * Transmissão e recepção do python
+	   */
+	  CDC_Receive_FS(Valores,sizeof(Valores));
+	  sprintf(message, "oi %d %d %d %d %d %d %d %d %d\n",Valores[0],Returns[1],Returns[2],Returns[3],Returns[4],Returns[5],Returns[6],Returns[7],Returns[8],Returns[9]);
+	  CDC_Transmit_FS(message,sizeof(message));
+
 	  //Loop entre Robos
 	  for(uint8_t i=0; i<3;i++){
 		  changeChannel(i); //Troca o canal para o  do robo especifico
-		  //Salva a variável para envio em seu respectivo vetor
+		  //Salva a variável para envio em sua respectiva posição no vetor de envio
 		  for(uint8_t n=0; n<4;n++){
 	  		 TxData[n+1] = Valores[n+4*i];
 	  		}
+		  TxData[0] = vet_senhas[i*2]; //Senha do robô especifico
+		  TxData[5] = vet_senhas[1+i*2];//Senha do robô especifico
+
 		  uint32_t Start = HAL_GetTick(); //Tempo de início de transmissão
 		  ret = NRF_TransmitAndWait(TxData, sizeof(TxData)); //Transmissão da mensagem
 		  uint32_t End = HAL_GetTick(); //Tempo de fim de transmissão
 		  acumulador[i]+= End - Start; //Acumulador de tempo de latência
 		  uint8_t ploss = NRF_ReadPacketLoss();//Leitura da perda de pacotes
-		  Returns[i+3] = acumulador[i];
+		  Returns[i+3] = acumulador[i]; //Salvamento de tempo acumulado no vetor de retorno ao python
 		  if(ret == NRF_OK){
 			  //Pino de confirmação
 			  HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_14);
-			  int retorno = 0;
-			  Returns[i] = retorno;
+			  int retorno = 0;//Gambiarra - Retirar
+			  Returns[i] = retorno;//Gambiarra - Retirar
 			  Returns[i+6] = ploss;
 			  acumulador[i] = 0;
 
-	  	}else if(ret == NRF_MAX_RT) {
+	  	}else if(ret == NRF_MAX_RT) { //Numero máximo de retransmissões
 	  		  HAL_GPIO_TogglePin(GPIOE, GPIO_PIN_1);
 
-	  	 } else {
+	  	 } else { //Sucesso - Necessario deixar função de transmissão mais robusta( Timeout e retorno de erro)
 	  		 HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_0);
 	  	 }
 	  }
-	  CDC_Receive_FS(Valores,sizeof(Valores));
-	  sprintf(message, "oi %d %d %d %d %d %d %d %d %d\n",Valores[0],Returns[1],Returns[2],Returns[3],Returns[4],Returns[5],Returns[6],Returns[7],Returns[8],Returns[9]);
-	  CDC_Transmit_FS(message,sizeof(message));
+
 
     /* USER CODE END WHILE */
 
@@ -232,13 +250,13 @@ void SystemClock_Config(void)
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI;
   RCC_OscInitStruct.PLL.PLLM = 4;
-  RCC_OscInitStruct.PLL.PLLN = 9;
+  RCC_OscInitStruct.PLL.PLLN = 25;
   RCC_OscInitStruct.PLL.PLLP = 2;
   RCC_OscInitStruct.PLL.PLLQ = 5;
   RCC_OscInitStruct.PLL.PLLR = 2;
   RCC_OscInitStruct.PLL.PLLRGE = RCC_PLL1VCIRANGE_3;
-  RCC_OscInitStruct.PLL.PLLVCOSEL = RCC_PLL1VCOMEDIUM;
-  RCC_OscInitStruct.PLL.PLLFRACN = 3072;
+  RCC_OscInitStruct.PLL.PLLVCOSEL = RCC_PLL1VCOWIDE;
+  RCC_OscInitStruct.PLL.PLLFRACN = 0;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
   {
     Error_Handler();
@@ -252,12 +270,12 @@ void SystemClock_Config(void)
   RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
   RCC_ClkInitStruct.SYSCLKDivider = RCC_SYSCLK_DIV1;
   RCC_ClkInitStruct.AHBCLKDivider = RCC_HCLK_DIV1;
-  RCC_ClkInitStruct.APB3CLKDivider = RCC_APB3_DIV1;
-  RCC_ClkInitStruct.APB1CLKDivider = RCC_APB1_DIV1;
-  RCC_ClkInitStruct.APB2CLKDivider = RCC_APB2_DIV1;
-  RCC_ClkInitStruct.APB4CLKDivider = RCC_APB4_DIV1;
+  RCC_ClkInitStruct.APB3CLKDivider = RCC_APB3_DIV2;
+  RCC_ClkInitStruct.APB1CLKDivider = RCC_APB1_DIV2;
+  RCC_ClkInitStruct.APB2CLKDivider = RCC_APB2_DIV2;
+  RCC_ClkInitStruct.APB4CLKDivider = RCC_APB4_DIV2;
 
-  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_1) != HAL_OK)
+  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_4) != HAL_OK)
   {
     Error_Handler();
   }
@@ -282,11 +300,11 @@ static void MX_SPI1_Init(void)
   hspi1.Instance = SPI1;
   hspi1.Init.Mode = SPI_MODE_MASTER;
   hspi1.Init.Direction = SPI_DIRECTION_2LINES;
-  hspi1.Init.DataSize = SPI_DATASIZE_4BIT;
+  hspi1.Init.DataSize = SPI_DATASIZE_8BIT;
   hspi1.Init.CLKPolarity = SPI_POLARITY_LOW;
   hspi1.Init.CLKPhase = SPI_PHASE_1EDGE;
   hspi1.Init.NSS = SPI_NSS_SOFT;
-  hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_2;
+  hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_8;
   hspi1.Init.FirstBit = SPI_FIRSTBIT_MSB;
   hspi1.Init.TIMode = SPI_TIMODE_DISABLE;
   hspi1.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
@@ -326,11 +344,26 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOC_CLK_ENABLE();
   __HAL_RCC_GPIOH_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
+  __HAL_RCC_GPIOB_CLK_ENABLE();
   __HAL_RCC_GPIOD_CLK_ENABLE();
   __HAL_RCC_GPIOG_CLK_ENABLE();
+  __HAL_RCC_GPIOE_CLK_ENABLE();
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_14, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOG, GPIO_PIN_12|GPIO_PIN_14, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(LED_2_GPIO_Port, LED_2_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin : PB14 */
+  GPIO_InitStruct.Pin = GPIO_PIN_14;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
   /*Configure GPIO pins : PG12 PG14 */
   GPIO_InitStruct.Pin = GPIO_PIN_12|GPIO_PIN_14;
@@ -338,6 +371,13 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOG, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : LED_2_Pin */
+  GPIO_InitStruct.Pin = LED_2_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(LED_2_GPIO_Port, &GPIO_InitStruct);
 
 /* USER CODE BEGIN MX_GPIO_Init_2 */
 /* USER CODE END MX_GPIO_Init_2 */

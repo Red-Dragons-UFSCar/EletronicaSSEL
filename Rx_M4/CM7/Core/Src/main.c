@@ -28,7 +28,7 @@
 /* USER CODE BEGIN Includes */
 #include "dshot.h"
 #include "string.h"
-//aa lula meu presidente
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -55,26 +55,22 @@
 COM_InitTypeDef BspCOMInit;
 
 /* USER CODE BEGIN PV */
-int new_mensagem[6]= {0,0,0,0,0,0};
-int old_mensagem[6]={0,0,0,0,0,0};
-uint32_t contador =0;
-float velocidade[4]={0,0,0,0};
-float ref[4] = {0,0,0,0};
+int new_mensagem[6]= {0,0,0,0,0,0}; //Mensagem que será confirmar da utilizada para referência
+int old_mensagem[6]={0,0,0,0,0,0}; //Mensagem que foi recebida anteriormente
+float ref[4] = {0,0,0,0}; //Referência que será utilizada para os motores
 
-
-// inter-core buffers
+// Struct que será compartilhada entre cores
 struct shared_data
 {
-	uint8_t sts_4to7; // status: 0 = empty, 1 = has data, 2 = locked (CM4-CM7)
-	uint8_t sts_7to4; // status: 0 = empty, 1 = has data, 2 = locked (CM7-CM4)
-	int M4toM7[6]; // 32 bytes from CM4 to CM7
-	int M7toM4[6]; // 32 bytes from CM7 to CM4
+	uint8_t sts_4to7; // status: 0 = Sem dados, 1 = Com dados, 2 = Em uso (CM4-CM7)
+	uint8_t sts_7to4; // status: 0 = Sem dados, 1 = Com dados, 2 = Em uso (CM7-CM4)
+	int M4toM7[6]; // 6 inteiros (24 bytes) do núcleo CM4 para o núcleo CM7
+	int M7toM4[6]; // 6 inteiros (24 bytes) do núcleo CM4 para o núcleo CM7
+	int Password[2]; // Senha utilizada na comunição recuperada do CM4
 };
 
-// pointer to shared_data struct (inter-core buffers and status)
+//Declaração da struct por meio de um ponteiro em um ponto de memória comum entre os cores
 volatile struct shared_data * const xfr_ptr = (struct shared_data *)0x38001000;
-
-uint16_t motores[4] = {0,0,0,0};
 
 
 /* USER CODE END PV */
@@ -84,36 +80,27 @@ void SystemClock_Config(void);
 void PeriphCommonClock_Config(void);
 /* USER CODE BEGIN PFP */
 
-
-void put_M7(uint8_t buffer[32]); // put data from M7 to M4
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-float elevado (uint32_t num , uint8_t pot){
-	float res = 1;
-	for(int n=0;n<pot;n++){
-		res = res*num;
-	}
-	return res;
-}
-
-void  get_M4(int *data) // get data from M4 to M7 buffer
+/*
+ * Função para obter dados do core M4
+ * Parâmetros:
+ * Ponteiro para a variável a ser modificado
+ */
+void  get_M4(int *data)
 {
-	if (xfr_ptr->sts_4to7 == 1) // if M4 to M7 buffer has data
+	if (xfr_ptr->sts_4to7 == 1) // Verifica se há dados a serem lidos
 	{
-		xfr_ptr->sts_4to7 = 2; // lock the M4 to M7 buffer
+		xfr_ptr->sts_4to7 = 2; // Determina que os dados estão em uso
 		for(int n = 0; n < 6; n++)
 		{
-			data[n] = xfr_ptr->M4toM7[n]; // transfer data
-			xfr_ptr->M4toM7[n] = 0; // clear M4 to M7 buffer
+			data[n] = xfr_ptr->M4toM7[n]; // Salva os dados na variável
+			xfr_ptr->M4toM7[n] = 0; // Limpa o dado em questão na struct
 		}
-		xfr_ptr->sts_4to7 = 0; // M4 to M7 buffer is empty
+		xfr_ptr->sts_4to7 = 0; // Libera o status para o salvemento de novos dados
 	}
-	// return the buffer (pointer)
-}
-void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim){
-	contador = __HAL_TIM_GET_COUNTER(&htim4);
 }
 /* USER CODE END 0 */
 
@@ -123,7 +110,6 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim){
   */
 int main(void)
 {
-
   /* USER CODE BEGIN 1 */
 
   /* USER CODE END 1 */
@@ -189,24 +175,24 @@ Error_Handler();
   MX_TIM15_Init();
   MX_ADC1_Init();
   /* USER CODE BEGIN 2 */
-
+  //Inicialização da leituras dos encoders
   HAL_TIM_Encoder_Start_IT(&htim4, TIM_CHANNEL_ALL);
   HAL_TIM_Encoder_Start_IT(&htim1, TIM_CHANNEL_ALL);
   HAL_TIM_Encoder_Start_IT(&htim8, TIM_CHANNEL_ALL);
   HAL_TIM_Encoder_Start_IT(&htim3, TIM_CHANNEL_ALL);
 
 
-	//initialize inter-core status pointers
-	xfr_ptr->sts_4to7 = 0;
-	xfr_ptr->sts_7to4 = 0;
+  //Inicialização dos status de dados
+  xfr_ptr->sts_4to7 = 0;
+  xfr_ptr->sts_7to4 = 0;
 
-
-	  if (HAL_TIM_Base_Start_IT(&htim15) != HAL_OK)
-	    {
-	      /* Starting Error */
-	      Error_Handler();
-	    }
-	  dshot_init(DSHOT300);
+  //Inicialização da interrupção a cada 10 ms
+  if (HAL_TIM_Base_Start_IT(&htim15) != HAL_OK)
+	{
+	  /* Starting Error */
+	  Error_Handler(); //Codigo é direcionado ao Error Handles caso não seja possível a inicialização
+	}
+  dshot_init(DSHOT300);//Inicialiazação do protocolo dshot para comunicação com ESC
   /* USER CODE END 2 */
 
   /* Initialize leds */
@@ -230,56 +216,68 @@ Error_Handler();
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  char message[100]={'\0'};
-  //Inicializa referencia como zero
-  HAL_Delay(7000);
 
+  //Vetor de caracteres para utilizar no serial (com objetivo de obtenção de dados dos motores)
+  char message[100]={'\0'};
+
+  //Variaveis de leitura de ADC para sensoriamento de corrente
   uint32_t Leitura= 0;
   float Leitura2 = 0;
+
+  //Variaveis de leitura vindas do arquivo de interrupção
   extern volatile float vel[4];
   extern volatile float u[4];
   extern volatile float error[4];
+
+  // Contador para utilização de tempo em testes sem comunicação
   uint32_t contador = 0;
+
+  //Delay para devia inicialização dos motores
+  HAL_Delay(7000);
+
+  //Loop principal
   while (1)
   {
 
-	      //comunicacao entre cores
-	  	  if (xfr_ptr->sts_4to7 == 1)
-	  	  {
-	  		 get_M4(new_mensagem); // get data sent from M4 to M7
-	  	  }
+	  //comunicacao entre cores
+	  if (xfr_ptr->sts_4to7 == 1)
+	  {
+		 get_M4(new_mensagem); // Obtem dados do core M4 na variável new_mensagem
+	  }
 
-		  //validacao da mensagem, utilizamos 111 como um ID de inicio e 112 de final
+	  //validacao da mensagem, utilizamos senhas especificas definidas no core M4 para cada um dos robos
+	  if((new_mensagem[0]==xfr_ptr->Password[0])&&(new_mensagem[5]==xfr_ptr->Password[1]))
+	  {
+		//Loop para salvamento de dados confirmados por senha
+		for(uint8_t n=0;n<6;n++)
+		{
+		  old_mensagem[n] = new_mensagem[n];
+		}
+	  }
 
-	  	  if((new_mensagem[0]==111)&&(new_mensagem[5]==112)){
-	  		for(uint8_t n=0;n<6;n++){
-	  		  old_mensagem[n] = new_mensagem[n];
-	  		}
-	  	  }
+	  for(uint8_t n=0; n<4;n++)
+	  {
+		 //Cálculo de referência
+		 ref[n] = (float)old_mensagem[n+1]/100;
 
-	  	  for(uint8_t n=0; n<4;n++){
-	  		 //ref[n] = (float)old_mensagem[n+1]/100;
-
-	  		  if(contador<400){
-	  			ref[n] =0;
-	  		  } else {
-	  			  ref[n] = -4;
-	  		  }
-
-	  	  }
-
-
-	  	  /*
-	  	for(uint8_t n=0; n<4;n++){
-	  		ref[n] =2;
-	  	}
-	  	   */
-	  	  //print para o puttyW
+		 //Codigo comentado para testes sem comunicação !!
+		 /*
+	  	 if(contador<400)
+	  	 {
+	  	   ref[n] =0;
+		 } else {
+		   ref[0] = 4;
+		   ref[1] = 4;
+		   ref[2] = -4;
+		   ref[3] = -4;
+		  }
+	  	 */
+	  }
+	  	  //Retorno de variáveis para o serial
 	  	  sprintf(message, "%f %f %f %f\n \r",vel[0],vel[1],vel[2],vel[3]);
 	  	  CDC_Transmit_FS(message,sizeof(message));
 
-	  	  //Iniciar ADC
-
+	  	  //Inicialização e leitura do ADC (Não completamente implementada)
 	  	  HAL_ADC_Start(&hadc1);
 	  	  HAL_ADC_PollForConversion(&hadc1, HAL_MAX_DELAY);
 	  	  Leitura = HAL_ADC_GetValue(&hadc1);
@@ -288,7 +286,7 @@ Error_Handler();
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-
+	//Contador de tempo utilizado (Opção alternativa: utilização da HAL_GetTick();
 	contador++;
 	HAL_Delay(5);
   }

@@ -51,18 +51,23 @@
 
 /* USER CODE BEGIN PV */
 
+// Struct que será compartilhada entre cores
 struct shared_data
 {
-	uint8_t sts_4to7; // status: 0 = empty, 1 = has data, 2 = locked (CM4-CM7)
-	uint8_t sts_7to4; // status: 0 = empty, 1 = has data, 2 = locked (CM7-CM4)
-	int M4toM7[6]; // 256 bytes from CM4 to CM7
-	int M7toM4[6]; // 256 bytes from CM7 to CM4
+	uint8_t sts_4to7; // status: 0 = Sem dados, 1 = Com dados, 2 = Em uso (CM4-CM7)
+	uint8_t sts_7to4; // status: 0 = Sem dados, 1 = Com dados, 2 = Em uso (CM7-CM4)
+	int M4toM7[6]; // 6 inteiros (24 bytes) do núcleo CM4 para o núcleo CM7
+	int M7toM4[6]; // 6 inteiros (24 bytes) do núcleo CM4 para o núcleo CM7
+	int Password[2]; // Senha utilizada na comunição recuperada do CM4
 };
 
-// pointer to shared_data struct (inter-core buffers and status)
+//Declaração da struct por meio de um ponteiro em um ponto de memória comum entre os cores
 volatile struct shared_data * const xfr_ptr = (struct shared_data *)0x38001000;
-int RxData[6] = {0,0,0,0,0,0};
-int Ack_data = 1;
+
+int RxData[6] = {0,0,0,0,0,0}; //Dados recebidos por comunicação
+int Ack_data = 1; //Dado a ser retornado (não funcionou)
+int vet_senhas[6]= {111,112,113,114,115,116}; //Vetor de senhas dos robos: (R1S1,R1S2,R2S1,R2S2,R3S1,R3S2)
+int senhas[2] = {0,0}; //Senha do robô selecionado
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -72,6 +77,12 @@ int Ack_data = 1;
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+
+/*
+ * Troca de modo do NRF24L01 para modo de transmissão
+ * Parâmetros:
+ * Endereço de transmissão
+ */
 void Tx_mode(uint8_t Adress[5]){
 
 	if(NRF_Init(&hspi1, GPIOG, GPIO_PIN_12, GPIOG, GPIO_PIN_14) != NRF_OK){
@@ -83,6 +94,11 @@ void Tx_mode(uint8_t Adress[5]){
 	//Para enviar a mensagem usar função transmitandwait
 }
 
+/*
+ * Troca de modo do NRF24L01 para modo de recepção
+ * Parâmetros:
+ * Endereço de recepção
+ */
 void Rx_mode(uint8_t Adress[5]){
 
 	if(NRF_Init(&hspi1, GPIOG, GPIO_PIN_12, GPIOG, GPIO_PIN_14) != NRF_OK){
@@ -98,6 +114,12 @@ void Rx_mode(uint8_t Adress[5]){
 	NRF_EnterMode(NRF_MODE_RX);
 }
 
+/*
+ * Função para precebimento de dados
+ * Parâmetros:
+ * Ponteiro para variavel on serão salvo os dados
+ * Tamanho em bytes dos dados
+ */
 NRF_Status ReceiveData (uint8_t *data, uint32_t len){
 	NRF_Status ret = NRF_ERROR;
 	uint8_t status = NRF_ReadStatus();
@@ -165,34 +187,53 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  GPIO_PinState PinState[2];
 
-  //definicao do robo por meio da entrada de tensao no pinc10 e Pinc11//
+  /*
+   * Definição de endereço de transmissão
+   */
+  uint8_t TxAdress0[] = {1,2,3,4,5};
+   Rx_mode(TxAdress0);
+
+  /*
+   * Selecionador de robôs
+   */
+  GPIO_PinState PinState[2];
+  //Leitura dos pinos PC10 e PC11
   PinState[0]= HAL_GPIO_ReadPin(GPIOC,GPIO_PIN_10);
   PinState[1]= HAL_GPIO_ReadPin(GPIOC,GPIO_PIN_11);
 
-  uint8_t TxAdress0[] = {1,2,3,4,5};
-  Rx_mode(TxAdress0);
+
   if((PinState[0]==0)&&(PinState[1]==0)){
-	  NRF_WriteRegisterByte(NRF_REG_RF_CH,0x04); // Canal 3
+	  NRF_WriteRegisterByte(NRF_REG_RF_CH,0x07); // Canal 3
+	  for(uint8_t k=0;k<2;k++){
+		  xfr_ptr->Password[k] = vet_senhas[k];
+	  }
   }
   if(PinState[0]==1){
-	  NRF_WriteRegisterByte(NRF_REG_RF_CH,0x02); // Canal 4
+	  NRF_WriteRegisterByte(NRF_REG_RF_CH,0x03); // Canal 4
 	  HAL_GPIO_TogglePin(GPIOE, GPIO_PIN_0);
+	  for(uint8_t k=0;k<2;k++){
+		  xfr_ptr->Password[k] = vet_senhas[k+2];
+	  	  }
   }
   if(PinState[1]==1){
-	  NRF_WriteRegisterByte(NRF_REG_RF_CH,0x03); //Canal 5
+	  NRF_WriteRegisterByte(NRF_REG_RF_CH,0x05); //Canal 5
 	  HAL_GPIO_TogglePin(GPIOE, GPIO_PIN_2);
+	  for(uint8_t k=0;k<2;k++){
+		  	  xfr_ptr->Password[k] = vet_senhas[k+4];
+	  	  }
   }
+
 
   NRF_Status ret = NRF_OK;
   while (1)
   {
-	 //comunicacao com o outro core
-	 ret = ReceiveData(RxData, sizeof(RxData));
+	 ret = ReceiveData(RxData, sizeof(RxData));//Recebimento de dados
+	 //Lede de confirmação de envio
 	 if(ret == NRF_OK){
 		 HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_0);
 	 }
+	 //Salvamento de dados para utilização em outro core
 	 if(xfr_ptr->sts_4to7 == 0){
 		 for(int n = 0; n < 6; n++){
 		 	xfr_ptr->M4toM7[n] = RxData[n];

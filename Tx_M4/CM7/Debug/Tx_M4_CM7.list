@@ -626,10 +626,10 @@ void SystemInit (void)
  8000798:	52004000 	.word	0x52004000
 
 0800079c <get_M4>:
-
-// pointer to shared_data struct (inter-core buffers and status)
-volatile struct shared_data * const xfr_ptr = (struct shared_data *)0x38001000;
-
+ * Função para obter dados do core M4
+ * Parâmetros:
+ * Ponteiro para a variável a ser modificado
+ */
 void  get_M4(int *data) // get data from M4 to M7 buffer
 {
  800079c:	b480      	push	{r7}
@@ -864,7 +864,7 @@ Error_Handler();
  80008f2:	2200      	movs	r2, #0
  80008f4:	705a      	strb	r2, [r3, #1]
 
-  char message[100] = {'\0'};
+  char message[100] = {'\0'}; //Vetor de caracteres para envio ao serial
  80008f6:	2300      	movs	r3, #0
  80008f8:	66fb      	str	r3, [r7, #108]	@ 0x6c
  80008fa:	f107 0370 	add.w	r3, r7, #112	@ 0x70
@@ -872,13 +872,13 @@ Error_Handler();
  8000900:	2100      	movs	r1, #0
  8000902:	4618      	mov	r0, r3
  8000904:	f00a fa1c 	bl	800ad40 <memset>
-  int Retorno[9] = {0,0,0,0,0,0,0,0,0};//Correntes (3 robos), Latência (3 Robos), Perda de Pacote (3 Robos)
+  int Retorno[9] = {0,0,0,0,0,0,0,0,0};//Vetor de retorno ao python = Correntes (3 robos), Latência (3 Robos), Perda de Pacote (3 Robos)
  8000908:	f107 0348 	add.w	r3, r7, #72	@ 0x48
  800090c:	2224      	movs	r2, #36	@ 0x24
  800090e:	2100      	movs	r1, #0
  8000910:	4618      	mov	r0, r3
  8000912:	f00a fa15 	bl	800ad40 <memset>
-  int Software[12] = {0,0,0,0,0,0,0,0,0,0,0,0}; //((vel)*4Rodas)*3Robos
+  int Software[12] = {0,0,0,0,0,0,0,0,0,0,0,0}; //vetor de informações recebidas do python = ((vel)*4Rodas)*3Robos
  8000916:	f107 0318 	add.w	r3, r7, #24
  800091a:	2230      	movs	r2, #48	@ 0x30
  800091c:	2100      	movs	r1, #0
@@ -886,6 +886,7 @@ Error_Handler();
  8000920:	f00a fa0e 	bl	800ad40 <memset>
   while (1)
   {
+	  //Obtenção de dados do core M4
 	  if(xfr_ptr->sts_4to7 == 1){
  8000924:	4b2f      	ldr	r3, [pc, #188]	@ (80009e4 <main+0x1e8>)
  8000926:	781b      	ldrb	r3, [r3, #0]
@@ -897,12 +898,15 @@ Error_Handler();
  8000932:	4618      	mov	r0, r3
  8000934:	f7ff ff32 	bl	800079c <get_M4>
 	  }
-	CDC_Receive_FS(Software,sizeof(Software));
+	  /*
+	   * Transmissão e recepção do python
+	   */
+	  CDC_Receive_FS(Software,sizeof(Software));
  8000938:	f107 0318 	add.w	r3, r7, #24
  800093c:	2130      	movs	r1, #48	@ 0x30
  800093e:	4618      	mov	r0, r3
  8000940:	f009 fd3a 	bl	800a3b8 <CDC_Receive_FS>
-	sprintf(message, "oi %d %d %d %d %d %d %d %d %d\n",Software[0],Retorno[1],Retorno[2],Retorno[3],Retorno[4],Retorno[5],Retorno[6],Retorno[7],Retorno[8],Retorno[9]);
+	  sprintf(message, "oi %d %d %d %d %d %d %d %d %d\n",Software[0],Retorno[1],Retorno[2],Retorno[3],Retorno[4],Retorno[5],Retorno[6],Retorno[7],Retorno[8],Retorno[9]);
  8000944:	69bb      	ldr	r3, [r7, #24]
  8000946:	60fb      	str	r3, [r7, #12]
  8000948:	6cf9      	ldr	r1, [r7, #76]	@ 0x4c
@@ -931,27 +935,29 @@ Error_Handler();
  8000978:	491b      	ldr	r1, [pc, #108]	@ (80009e8 <main+0x1ec>)
  800097a:	4660      	mov	r0, ip
  800097c:	f00a f9c0 	bl	800ad00 <siprintf>
-	CDC_Transmit_FS(message,sizeof(message));
+	  CDC_Transmit_FS(message,sizeof(message));
  8000980:	f107 036c 	add.w	r3, r7, #108	@ 0x6c
  8000984:	2164      	movs	r1, #100	@ 0x64
  8000986:	4618      	mov	r0, r3
  8000988:	f009 fd2a 	bl	800a3e0 <CDC_Transmit_FS>
-	/*
 	if(xfr_ptr->sts_7to4 == 0){
 		 xfr_ptr->sts_7to4 = 1;
 	 }
 	*/
-	if(xfr_ptr->sts_7to4 == 0){
+	  //Transferência de informações ao core M4
+	  if(xfr_ptr->sts_7to4 == 0)
  800098c:	4b15      	ldr	r3, [pc, #84]	@ (80009e4 <main+0x1e8>)
  800098e:	785b      	ldrb	r3, [r3, #1]
  8000990:	b2db      	uxtb	r3, r3
  8000992:	2b00      	cmp	r3, #0
  8000994:	d11e      	bne.n	80009d4 <main+0x1d8>
-			 for(int n = 0; n < 12; n++){
+	  {
+		 for(int n = 0; n < 12; n++)
  8000996:	2300      	movs	r3, #0
  8000998:	f8c7 30d0 	str.w	r3, [r7, #208]	@ 0xd0
  800099c:	e013      	b.n	80009c6 <main+0x1ca>
-			 	xfr_ptr->M7toM4[n] = Software[n];
+		 {
+			xfr_ptr->M7toM4[n] = Software[n];
  800099e:	4911      	ldr	r1, [pc, #68]	@ (80009e4 <main+0x1e8>)
  80009a0:	f8d7 30d0 	ldr.w	r3, [r7, #208]	@ 0xd0
  80009a4:	009b      	lsls	r3, r3, #2
@@ -962,19 +968,19 @@ Error_Handler();
  80009b2:	f8d7 30d0 	ldr.w	r3, [r7, #208]	@ 0xd0
  80009b6:	330a      	adds	r3, #10
  80009b8:	f841 2023 	str.w	r2, [r1, r3, lsl #2]
-			 for(int n = 0; n < 12; n++){
+		 for(int n = 0; n < 12; n++)
  80009bc:	f8d7 30d0 	ldr.w	r3, [r7, #208]	@ 0xd0
  80009c0:	3301      	adds	r3, #1
  80009c2:	f8c7 30d0 	str.w	r3, [r7, #208]	@ 0xd0
  80009c6:	f8d7 30d0 	ldr.w	r3, [r7, #208]	@ 0xd0
  80009ca:	2b0b      	cmp	r3, #11
  80009cc:	dde7      	ble.n	800099e <main+0x1a2>
-			 	}
+		 }
 			 xfr_ptr->sts_7to4 = 1;
  80009ce:	4b05      	ldr	r3, [pc, #20]	@ (80009e4 <main+0x1e8>)
  80009d0:	2201      	movs	r2, #1
  80009d2:	705a      	strb	r2, [r3, #1]
-		 }
+	  }
 
 
 	HAL_Delay(1);

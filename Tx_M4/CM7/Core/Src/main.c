@@ -51,17 +51,23 @@ COM_InitTypeDef BspCOMInit;
 
 /* USER CODE BEGIN PV */
 
+// Struct que será compartilhada entre cores
 struct shared_data
 {
-	uint8_t sts_4to7; // status: 0 = empty, 1 = has data, 2 = locked (CM4-CM7)
-	uint8_t sts_7to4; // status: 0 = empty, 1 = has data, 2 = locked (CM7-CM4)
-	int M4toM7[9]; // 256 bytes from CM4 to CM7
-	int M7toM4[12]; // 256 bytes from CM7 to CM4
+	uint8_t sts_4to7; // status: 0 = Sem dados, 1 = Com dados, 2 = Em uso (CM4-CM7)
+	uint8_t sts_7to4; // status: 0 = Sem dados, 1 = Com dados, 2 = Em uso (CM7-CM4)
+	int M4toM7[9]; // 9 inteiros (36 bytes) do núcleo CM4 para o núcleo CM7
+	int M7toM4[12]; // 12 inteiros (48 bytes) do núcleo CM4 para o núcleo CM7
 };
 
-// pointer to shared_data struct (inter-core buffers and status)
+//Declaração da struct por meio de um ponteiro em um ponto de memória comum entre os cores
 volatile struct shared_data * const xfr_ptr = (struct shared_data *)0x38001000;
 
+/*
+ * Função para obter dados do core M4
+ * Parâmetros:
+ * Ponteiro para a variável a ser modificado
+ */
 void  get_M4(int *data) // get data from M4 to M7 buffer
 {
 	 // buffer to receive data
@@ -76,6 +82,7 @@ void  get_M4(int *data) // get data from M4 to M7 buffer
 		xfr_ptr->sts_4to7 = 0; // M4 to M7 buffer is empty
 	} // return the buffer (pointer)
 }
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -177,28 +184,35 @@ Error_Handler();
   xfr_ptr->sts_4to7 = 0;
   xfr_ptr->sts_7to4 = 0;
 
-  char message[100] = {'\0'};
-  int Retorno[9] = {0,0,0,0,0,0,0,0,0};//Correntes (3 robos), Latência (3 Robos), Perda de Pacote (3 Robos)
-  int Software[12] = {0,0,0,0,0,0,0,0,0,0,0,0}; //((vel)*4Rodas)*3Robos
+  char message[100] = {'\0'}; //Vetor de caracteres para envio ao serial
+  int Retorno[9] = {0,0,0,0,0,0,0,0,0};//Vetor de retorno ao python = Correntes (3 robos), Latência (3 Robos), Perda de Pacote (3 Robos)
+  int Software[12] = {0,0,0,0,0,0,0,0,0,0,0,0}; //vetor de informações recebidas do python = ((vel)*4Rodas)*3Robos
   while (1)
   {
+	  //Obtenção de dados do core M4
 	  if(xfr_ptr->sts_4to7 == 1){
 		get_M4(Retorno);
 	  }
-	CDC_Receive_FS(Software,sizeof(Software));
-	sprintf(message, "oi %d %d %d %d %d %d %d %d %d\n",Software[0],Retorno[1],Retorno[2],Retorno[3],Retorno[4],Retorno[5],Retorno[6],Retorno[7],Retorno[8],Retorno[9]);
-	CDC_Transmit_FS(message,sizeof(message));
+	  /*
+	   * Transmissão e recepção do python
+	   */
+	  CDC_Receive_FS(Software,sizeof(Software));
+	  sprintf(message, "oi %d %d %d %d %d %d %d %d %d\n",Software[0],Retorno[1],Retorno[2],Retorno[3],Retorno[4],Retorno[5],Retorno[6],Retorno[7],Retorno[8],Retorno[9]);
+	  CDC_Transmit_FS(message,sizeof(message));
 	/*
 	if(xfr_ptr->sts_7to4 == 0){
 		 xfr_ptr->sts_7to4 = 1;
 	 }
 	*/
-	if(xfr_ptr->sts_7to4 == 0){
-			 for(int n = 0; n < 12; n++){
-			 	xfr_ptr->M7toM4[n] = Software[n];
-			 	}
-			 xfr_ptr->sts_7to4 = 1;
+	  //Transferência de informações ao core M4
+	  if(xfr_ptr->sts_7to4 == 0)
+	  {
+		 for(int n = 0; n < 12; n++)
+		 {
+			xfr_ptr->M7toM4[n] = Software[n];
 		 }
+			 xfr_ptr->sts_7to4 = 1;
+	  }
 
 
 	HAL_Delay(1);

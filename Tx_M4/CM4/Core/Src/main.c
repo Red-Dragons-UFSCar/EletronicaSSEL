@@ -48,23 +48,30 @@
 SPI_HandleTypeDef hspi1;
 
 /* USER CODE BEGIN PV */
+
+// Struct que será compartilhada entre cores
 struct shared_data
 {
-	uint8_t sts_4to7; // status: 0 = empty, 1 = has data, 2 = locked (CM4-CM7)
-	uint8_t sts_7to4; // status: 0 = empty, 1 = has data, 2 = locked (CM7-CM4)
-	int M4toM7[9]; // 256 bytes from CM4 to CM7
-	int M7toM4[12]; // 256 bytes from CM7 to CM4
+	uint8_t sts_4to7; // status: 0 = Sem dados, 1 = Com dados, 2 = Em uso (CM4-CM7)
+	uint8_t sts_7to4; // status: 0 = Sem dados, 1 = Com dados, 2 = Em uso (CM7-CM4)
+	int M4toM7[9]; // 9 inteiros (36 bytes) do núcleo CM4 para o núcleo CM7
+	int M7toM4[12]; // 12 inteiros (48 bytes) do núcleo CM4 para o núcleo CM7
 };
 
-// pointer to shared_data struct (inter-core buffers and status)
+//Declaração da struct por meio de um ponteiro em um ponto de memória comum entre os cores
 volatile struct shared_data * const xfr_ptr = (struct shared_data *)0x38001000;
 
-void get_M7(int *data) // get data from M4 to M7 buffer
+/*
+ * Função para obter dados do core M7
+ * Parâmetros:
+ * Ponteiro para a variável a ser modificado
+ */
+void get_M7(int *data)
 {
 	if (xfr_ptr->sts_7to4 == 1) // if M4 to M7 buffer has data
 	{
 		xfr_ptr->sts_7to4 = 2; // lock the M4 to M7 buffer
-		for(int n = 0; n < 12; n++)
+		for(uint8_t n = 0; n <12; n++)
 		{
 			data[n] = xfr_ptr->M7toM4[n]; // transfer data
 			xfr_ptr->M7toM4[n] = 0; // clear M4 to M7 buffer
@@ -73,12 +80,11 @@ void get_M7(int *data) // get data from M4 to M7 buffer
 	}
 }
 
-uint8_t TxAdress0[] = {1,2,3,4,5};
+uint8_t TxAdress0[] = {1,2,3,4,5}; //Endereço de envio
+int TxData[6]={111,0,0,0,0,112}; //Vetor enviado
+uint8_t RxData[1]; //Mensagem retornada (Descontinuada)
+int vet_senhas[6]= {111,112,113,114,115,116}; //Vetor de senhas dos robos: (R1S1,R1S2,R2S1,R2S2,R3S1,R3S2)
 
-
-int TxData[6]={111,0,0,0,0,112};
-uint8_t RxData[1];
-uint8_t ReadMemManco = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -90,6 +96,12 @@ static void MX_SPI1_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+
+/*
+ * Troca de modo do NRF24L01 para modo de transmissão
+ * Parâmetros:
+ * Endereço de transmissão
+ */
 void Tx_mode(uint8_t Adress[5]){
 
 	if(NRF_Init(&hspi1, GPIOG, GPIO_PIN_12, GPIOG, GPIO_PIN_14) != NRF_OK){
@@ -102,6 +114,10 @@ void Tx_mode(uint8_t Adress[5]){
 	NRF_WriteRegister(NRF_REG_RX_ADDR_P0, Adress, 5);
 }
 
+/*
+ * Função para mudar o canal de comunicação
+ * Parâmetros: Robô alvo
+ */
 void changeChannel(uint8_t n){
 	NRF_EnterMode(NRF_MODE_STANDBY1);
 	if(n==0){
@@ -115,19 +131,7 @@ void changeChannel(uint8_t n){
 	}
 	NRF_EnterMode(NRF_MODE_TX);
 }
-NRF_Status ReceiveData (uint8_t *data, uint32_t len){
-	NRF_Status ret = NRF_ERROR;
-	uint8_t status = NRF_ReadStatus();
-	uint8_t STATUS_REGISTER_RX_DR_BIT = 6;
-	if(status & (1<<STATUS_REGISTER_RX_DR_BIT)){
-		NRF_ReadPayload(data,len);
-		ret = NRF_OK;
-		NRF_SetRegisterBit(NRF_REG_STATUS, 6);
-	} else {
-		ret = NRF_ERROR;
-	}
-	return ret;
-}
+
 
 /* USER CODE END 0 */
 
@@ -174,18 +178,21 @@ int main(void)
   MX_GPIO_Init();
   MX_SPI1_Init();
   /* USER CODE BEGIN 2 */
-  Tx_mode(TxAdress0);
+  Tx_mode(TxAdress0); //Inicialização do NRF em modo de transmissão
 
   NRF_Status ret = NRF_OK;
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+
+  //Inicialização dos ponteiros entre núcleos
   xfr_ptr->sts_4to7 = 0;
   xfr_ptr->sts_7to4 = 0;
-  int Valores[12] = {0,0,0,0,0,0,0,0,0,0,0,0};
-  int Returns[9]={0,0,0,0,0,0,0,0,0};
-  uint32_t acumulador[3] = {1,1,1};
+
+  int Valores[12] = {0,0,0,0,0,0,0,0,0,0,0,0}; //Vetor obtido do core M7
+  int Returns[9]={0,0,0,0,0,0,0,0,0}; //Retornos ao serial
+  uint32_t acumulador[3] = {0,0,0};
 
   while (1)
   {
@@ -199,27 +206,31 @@ int main(void)
 		 //Salva a variável para envio em seu respectivo vetor
 		 for(uint8_t n=0; n<4;n++){
 			 TxData[n+1] = Valores[n+4*i];
-		}
+		 }
+		 TxData[0] = vet_senhas[i*2]; //Senha do robô especifico
+		 TxData[5] = vet_senhas[1+i*2];//Senha do robô especifico
+
 		 uint32_t Start = HAL_GetTick(); //Tempo de início de transmissão
 		 ret = NRF_TransmitAndWait(TxData, sizeof(TxData)); //Transmissão da mensagem
 		 uint32_t End = HAL_GetTick(); //Tempo de fim de transmissão
 		 acumulador[i]+= End - Start; //Acumulador de tempo de latência
 		 uint8_t ploss = NRF_ReadPacketLoss();//Leitura da perda de pacotes
-		 Returns[i+3] = acumulador[i];
+		 Returns[i+3] = acumulador[i];//Salvamento de tempo acumulado no vetor de retorno ao python
 		 if(ret == NRF_OK){
 			 //Pino de confirmação
 			 HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_14);
-			 int retorno = 0;
-			 Returns[i] = retorno;
+			 int retorno = 0;//Gambiarra - Retirar
+			 Returns[i] = retorno;//Gambiarra - Retirar
 			 Returns[i+6] = ploss;
 			 acumulador[i] = 0;
-		 } else if(ret == NRF_MAX_RT) {
+		 } else if(ret == NRF_MAX_RT) {//Numero máximo de retransmissões
 			 HAL_GPIO_TogglePin(GPIOE, GPIO_PIN_1);
 
-	 } else {
+	 } else {//Sucesso - Necessario deixar função de transmissão mais robusta( Timeout e retorno de erro)
 		 HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_0);
 	 }
 	 }
+	 //Retorno de dados ao core M7
 	 if(xfr_ptr->sts_4to7 == 0){
 	 		 for(uint8_t n = 0 ;n<9;n++){
 	 			 xfr_ptr->M4toM7[n] = Returns[n];
