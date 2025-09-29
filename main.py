@@ -46,7 +46,7 @@ class RobotVelocity:
         self.treshold_message = 2*RECEIVER_FPS
 
 class Receiver():
-    def __init__(self, ip: str = 'localhost', port: int = 10302, logger: bool = False):
+    def __init__(self, ip: str = 'localhost', port: int = 10330, logger: bool = False):
         """
         Descrição:
             Classe para recepção de mensagens serializadas usando Google Protobuf.
@@ -74,15 +74,17 @@ class Receiver():
         self._create_socket()
 
     def _create_socket(self):
-        """
-        Descrição:
-            Cria o socket UDP e configura-o para ser não-bloqueante.
-        """
+        """Cria e configura o socket UDP."""
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        
+        # Adicionado para permitir que múltiplos sockets se conectem à mesma porta.
+        # Funciona em sistemas baseados em Linux/Unix, pode não estar disponível no Windows.
+        if hasattr(socket, 'SO_REUSEPORT'):
+            self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
+
         self.socket.bind((self.ip, self.port))
-        self.socket.setblocking(False)
-        self.socket.settimeout(0.0)  # Não bloqueia
+        self.socket.settimeout(0.1) # Timeout para não bloquear indefinidamente
 
     def receive_socket(self):
         """
@@ -150,10 +152,8 @@ receiver = Receiver(port=10330, logger=False)
 receiver.start_thread()
 
 # Declaração do objeto serial
-ser = serial.Serial()
-ser.baudrate = SERIAL_BAUD_RATE
-ser.port = SERIAL_PORT # Conferir a porta USB que será utilizada
-ser.open()
+# ser = serial.Serial(SERIAL_PORT, SERIAL_BAUD_RATE, timeout=1)
+# ser.open()
 
 while True:
     t1 = time.time()
@@ -201,25 +201,25 @@ while True:
     # Padrão software: (1,2,3,4)
     # Padrão Eletrônica: (4,3,2,1)
 
-    Rd = [int(robot0.wheel_velocity_front_left * CONV_GEAR*CONV_RAD_HZ*100),
-          int(robot0.wheel_velocity_back_left * CONV_GEAR*CONV_RAD_HZ*100),
-          int(robot0.wheel_velocity_back_right * CONV_GEAR*CONV_RAD_HZ*100),
-          int(robot0.wheel_velocity_front_right * CONV_GEAR*CONV_RAD_HZ*100),
-          int(robot1.wheel_velocity_front_left * CONV_GEAR*CONV_RAD_HZ*100),
-          int(robot1.wheel_velocity_back_left * CONV_GEAR*CONV_RAD_HZ*100),
-          int(robot1.wheel_velocity_back_right * CONV_GEAR*CONV_RAD_HZ*100),
-          int(robot1.wheel_velocity_front_right * CONV_GEAR*CONV_RAD_HZ*100),
-          int(robot2.wheel_velocity_front_left * CONV_GEAR*CONV_RAD_HZ*100),
-          int(robot2.wheel_velocity_back_left * CONV_GEAR*CONV_RAD_HZ*100),
-          int(robot2.wheel_velocity_back_right * CONV_GEAR*CONV_RAD_HZ*100),
-          int(robot2.wheel_velocity_front_right * CONV_GEAR*CONV_RAD_HZ*100),]
+    # Rd = [int(robot0.wheel_velocity_front_left * CONV_GEAR*CONV_RAD_HZ*100),
+    #       int(robot0.wheel_velocity_back_left * CONV_GEAR*CONV_RAD_HZ*100),
+    #       int(robot0.wheel_velocity_back_right * CONV_GEAR*CONV_RAD_HZ*100),
+    #       int(robot0.wheel_velocity_front_right * CONV_GEAR*CONV_RAD_HZ*100),
+    #       int(robot1.wheel_velocity_front_left * CONV_GEAR*CONV_RAD_HZ*100),
+    #       int(robot1.wheel_velocity_back_left * CONV_GEAR*CONV_RAD_HZ*100),
+    #       int(robot1.wheel_velocity_back_right * CONV_GEAR*CONV_RAD_HZ*100),
+    #       int(robot1.wheel_velocity_front_right * CONV_GEAR*CONV_RAD_HZ*100),
+    #       int(robot2.wheel_velocity_front_left * CONV_GEAR*CONV_RAD_HZ*100),
+    #       int(robot2.wheel_velocity_back_left * CONV_GEAR*CONV_RAD_HZ*100),
+    #       int(robot2.wheel_velocity_back_right * CONV_GEAR*CONV_RAD_HZ*100),
+    #       int(robot2.wheel_velocity_front_right * CONV_GEAR*CONV_RAD_HZ*100),]
     
-    Rd2 = struct.pack('i' * len(Rd), *Rd)  # 'i' para cada inteiro
-    ser.write(Rd2)
-    ser.flushInput()
-    var = (ser.readline()).decode("utf-8")
-    var = var.rstrip('\x00')
-    print(var) #Nesta variavel estara a string com as informações na ordem Corrente1,corrente2,corrente3,corrente4,lat1,lat2,lat3,lat4,packgeloss1 ...
+    # Rd2 = struct.pack('i' * len(Rd), *Rd)  # 'i' para cada inteiro
+    # ser.write(Rd2)
+    # ser.flushInput()
+    # var = (ser.readline()).decode("utf-8")
+    # var = var.rstrip('\x00')
+    # print(var) #Nesta variavel estara a string com as informações na ordem Corrente1,corrente2,corrente3,corrente4,lat1,lat2,lat3,lat4,packgeloss1 ...
 
     t2 = time.time()
 

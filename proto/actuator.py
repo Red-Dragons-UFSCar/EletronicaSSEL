@@ -49,15 +49,18 @@ class Actuator():
 
 
     def _create_socket(self):
-        '''
-        Descrição:  
-                Método responsável pela criação do socket de conexão com o servidor de visão
-        '''
-        self.socket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
+        """Cria e configura o socket UDP."""
+        self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        
+        # Adicionado para permitir que múltiplos sockets se conectem à mesma porta.
+        # Funciona em sistemas baseados em Linux/Unix.
+        if hasattr(socket, 'SO_REUSEPORT'):
+            self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
+
         self.socket.bind((self.ip, self.port))
-        self.socket.setblocking(False) 
-        self.socket.settimeout(0.0)
+        # Define o socket como não-bloqueante, como na sua sugestão.
+        self.socket.setblocking(False)
 
     
     def send_socket(self, data):
