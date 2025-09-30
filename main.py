@@ -142,6 +142,123 @@ class Receiver():
         """
         self.vision_thread = RepeatTimer((1 / RECEIVER_FPS), self.receive_socket)
         self.vision_thread.start()
+        
+class ComunicacaoSerial:
+    def __init__(self, porta, baudrate=115200, timeout=1):
+        """Inicializa a comunicação serial e a thread de leitura."""
+        self.ser = None
+        try:
+            self.ser = serial.Serial(porta, baudrate, timeout=timeout)
+            print(f"Porta serial '{porta}' aberta com sucesso a {baudrate} bps.")
+        except serial.SerialException as e:
+            print(f"ERRO: Não foi possível abrir a porta serial '{porta}'.")
+            print(f"Detalhe do erro: {e}")
+            print("Verifique se a porta está correta e não está sendo usada por outro programa.")
+            raise
+
+        self.dados_recebidos = {}
+        self.rodando = True
+        
+        self.thread_leitura = threading.Thread(target=self._ler_dados_serial)
+        self.thread_leitura.daemon = True
+        self.thread_leitura.start()
+
+    def _ler_dados_serial(self):
+        """
+        Método executado em segundo plano pela thread para ler e processar dados.
+        """
+        while self.rodando:
+            if self.ser and self.ser.in_waiting > 0:
+                try:
+                    linha_bytes = self.ser.readline()
+                    linha_str = linha_bytes.decode('utf-8').strip()
+                    linha_str = linha_str.rstrip('\x00')
+
+                    if not linha_str:
+                        continue
+
+                    #print(f"Recebido: '{linha_str}'")
+                    
+                    partes = linha_str.split(',')
+
+                    if len(partes) >= 2 and len(partes) % 6 == 0:
+                        for i in range(0, len(partes), 6):
+                            bloco = partes[i:i+6]
+                            try:
+                                id_robo = int(bloco[0])
+                                velocidades = [float(v) for v in bloco[1:5]]
+                                latencia = float(bloco[5])
+
+                                self.dados_recebidos[id_robo] = {
+                                    'velocidades': velocidades,
+                                    'latencia': latencia,
+                                    'timestamp': time.time()
+                                }
+                            except (ValueError, IndexError):
+                                print(f"  -> Aviso: Bloco de dados mal formatado: {bloco}")
+
+                    else:
+                        self.dados_recebidos['raw'] = linha_str
+
+                except UnicodeDecodeError:
+                    print(f"  -> Aviso: Erro de decodificação de bytes. Dados recebidos podem estar corrompidos.")
+                except Exception as e:
+                    print(f"  -> Erro inesperado na thread de leitura: {e}")
+            
+            time.sleep(0.01)
+
+    # --- 2. ALTERAÇÃO PRINCIPAL NA CLASSE ---
+    def enviar_comando(self, comando):
+        """Envia uma string de comando ou um objeto de bytes para a porta serial."""
+        if self.ser and self.ser.is_open:
+            dados_para_enviar = None
+            
+            # Se o comando for uma string, codifique-o como antes.
+            if isinstance(comando, str):
+                if not comando.endswith('\n'):
+                    comando += '\n'
+                dados_para_enviar = comando.encode('utf-8')
+            
+            # Se o comando já for bytes, use-o diretamente.
+            elif isinstance(comando, bytes):
+                dados_para_enviar = comando
+            
+            else:
+                print(f"ERRO: Tipo de dado '{type(comando)}' não pode ser enviado.")
+                return
+
+            try:
+                self.ser.write(dados_para_enviar)
+                # print(f"Enviado: {dados_para_enviar}") # Debug de envio
+            except serial.SerialException as e:
+                print(f"ERRO ao enviar dados: {e}")
+
+    def get_dados(self, id_robo):
+        """Retorna os últimos dados recebidos para um ID específico."""
+        return self.dados_recebidos.get(id_robo)
+
+    def fechar(self):
+        """Fecha a porta serial e termina a thread de forma segura."""
+        print("Fechando a comunicação serial...")
+        self.rodando = False
+        self.thread_leitura.join()
+        if self.ser and self.ser.is_open:
+            self.ser.close()
+            print("Porta serial fechada.")
+    
+    def decode_message(self, message):
+        id_robot = message.robot_commands[0].id
+        wheel_velocity_front_right = message.robot_commands[0].move_command.wheel_velocity.front_right
+        wheel_velocity_back_right = message.robot_commands[0].move_command.wheel_velocity.back_right
+        wheel_velocity_back_left = message.robot_commands[0].move_command.wheel_velocity.back_left
+        wheel_velocity_front_left = message.robot_commands[0].move_command.wheel_velocity.front_left
+        kick_speed = message.robot_commands[0].kick_speed
+        self.robots[id_robot].wheel_velocity_front_right = wheel_velocity_front_right
+        self.robots[id_robot].wheel_velocity_back_right = wheel_velocity_back_right
+        self.robots[id_robot].wheel_velocity_back_left = wheel_velocity_back_left
+        self.robots[id_robot].wheel_velocity_front_left = wheel_velocity_front_left
+        self.robots[id_robot].cont_not_message = 0
+        self.robots[id_robot].kick_speed = kick_speed
 
 # ---------------------------------------------------------------------------------------------
 #   INICIO DO CÓDIGO PRINCIPAL
@@ -152,13 +269,12 @@ receiver = Receiver(port=10330, logger=False)
 receiver.start_thread()
 
 # Declaração do objeto serial
-# ser = serial.Serial(SERIAL_PORT, SERIAL_BAUD_RATE, timeout=1)
-# ser.open()
+comunicador = ComunicacaoSerial(SERIAL_PORT, SERIAL_BAUD_RATE)
 
 while True:
     t1 = time.time()
 
-    #receiver.receive_socket()
+    receiver.receive_socket()
     # Acesso das variáveis obtidas pela rede em cada um dos robôs [0, 1 e 2]
     for robot in receiver.robots:
         print("Robô ", robot.id_robot)
@@ -200,21 +316,40 @@ while True:
     # Velocidades das rodas  (1,2,3,4) dos robos (1,2,3) (Roda 1 robo1, Roda 2 robo 1, Roda 3 Robo 1 ... )
     # Padrão software: (1,2,3,4)
     # Padrão Eletrônica: (4,3,2,1)
-
-    # Rd = [int(robot0.wheel_velocity_front_left * CONV_GEAR*CONV_RAD_HZ*100),
-    #       int(robot0.wheel_velocity_back_left * CONV_GEAR*CONV_RAD_HZ*100),
-    #       int(robot0.wheel_velocity_back_right * CONV_GEAR*CONV_RAD_HZ*100),
-    #       int(robot0.wheel_velocity_front_right * CONV_GEAR*CONV_RAD_HZ*100),
-    #       int(robot1.wheel_velocity_front_left * CONV_GEAR*CONV_RAD_HZ*100),
-    #       int(robot1.wheel_velocity_back_left * CONV_GEAR*CONV_RAD_HZ*100),
-    #       int(robot1.wheel_velocity_back_right * CONV_GEAR*CONV_RAD_HZ*100),
-    #       int(robot1.wheel_velocity_front_right * CONV_GEAR*CONV_RAD_HZ*100),
-    #       int(robot2.wheel_velocity_front_left * CONV_GEAR*CONV_RAD_HZ*100),
-    #       int(robot2.wheel_velocity_back_left * CONV_GEAR*CONV_RAD_HZ*100),
-    #       int(robot2.wheel_velocity_back_right * CONV_GEAR*CONV_RAD_HZ*100),
-    #       int(robot2.wheel_velocity_front_right * CONV_GEAR*CONV_RAD_HZ*100),]
     
-    # Rd2 = struct.pack('i' * len(Rd), *Rd)  # 'i' para cada inteiro
+    def kicker_bit(r): # Se o kicker estiver ativo, retorna 1, senão 0
+        return 1 if getattr(r, 'kick_speed', 0) != 0 else 0
+
+
+    valores_para_enviar = [
+        int(robot0.wheel_velocity_front_left),
+        int(robot0.wheel_velocity_back_left),
+        int(robot0.wheel_velocity_back_right),
+        int(robot0.wheel_velocity_front_right),
+        kicker_bit(robot0),
+
+        int(robot1.wheel_velocity_front_left),
+        int(robot1.wheel_velocity_back_left),
+        int(robot1.wheel_velocity_back_right),
+        int(robot1.wheel_velocity_front_right),
+        kicker_bit(robot1),
+
+        int(robot2.wheel_velocity_front_left),
+        int(robot2.wheel_velocity_back_left),
+        int(robot2.wheel_velocity_back_right),
+        int(robot2.wheel_velocity_front_right),
+        kicker_bit(robot2),
+    ]
+    
+    print(valores_para_enviar)
+
+    formato = f'<{len(valores_para_enviar)}i'  # 15 inteiros
+    comando_em_bytes = struct.pack(formato, *valores_para_enviar)
+    
+    # Envia o comando em formato de bytes
+    # comunicador.enviar_comando(comando_em_bytes)
+    
+    #= struct.pack('i' * len(Rd), *Rd)  # 'i' para cada inteiro
     # ser.write(Rd2)
     # ser.flushInput()
     # var = (ser.readline()).decode("utf-8")
